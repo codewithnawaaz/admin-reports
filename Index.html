@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manpower Dashboard - Home</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+  <!-- Top Navigation Bar -->
+  <nav class="bg-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold text-blue-600">👷 Manpower Dashboard</h1>
+      <div class="space-x-4">
+        <a href="index.html" class="text-gray-700 hover:text-blue-600 font-medium">Home</a>
+        <a href="Reports.html" class="text-gray-700 hover:text-blue-600 font-medium">Reports</a>
+        <a href="manpower.html" class="text-gray-700 hover:text-blue-600 font-medium">ActiveManpower</a>
+        <a href="leave.html" class="text-gray-700 hover:text-blue-600 font-medium">Transfer/Leave</a>
+        <button id="logoutBtn" class="hidden bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Logout</button>
+      </div>
+    </div>
+  </nav>
+  
+<!-- Password Modal -->
+<div id="passwordModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white p-6 rounded-lg shadow-lg text-center max-w-xs w-full">
+    <h2 class="text-lg font-semibold mb-4">Enter Password</h2>
+    <input
+      type="password"
+      id="passwordInput"
+      class="border border-gray-300 rounded px-3 py-2 w-full mb-4"
+      placeholder="Password"
+    />
+    <button
+      id="submitPassword"
+      class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full"
+    >
+      Submit
+    </button>
+  </div>
+</div>
+
+
+  <!-- Content -->
+  <main class="max-w-7xl mx-auto px-4 py-10">
+    <h2 class="text-xl font-semibold mb-6 text-center">Welcome to your manpower control panel</h2>
+    
+
+    <!-- Summary Cards -->
+    <!-- Summary Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+  <div class="bg-white rounded-xl shadow-md p-6 text-center">
+    <h3 class="text-lg font-bold text-gray-600">Total Manpower</h3>
+    <p id="totalManpower" class="text-3xl font-bold text-blue-600 mt-2"></p>
+  </div>
+  <div class="bg-white rounded-xl shadow-md p-6 text-center">
+    <h3 class="text-lg font-bold text-gray-600">Upcoming Leave</h3>
+    <p id="upcomingLeave" class="text-3xl font-bold text-yellow-500 mt-2"></p>
+  </div>
+  <div class="bg-white rounded-xl shadow-md p-6 text-center">
+    <h3 class="text-lg font-bold text-gray-600">Annual Leave</h3>
+    <p id="annualLeave" class="text-3xl font-bold text-green-500 mt-2"></p>
+  </div>
+  <div class="bg-white rounded-xl shadow-md p-6 text-center">
+    <h3 class="text-lg font-bold text-gray-600">Transferred</h3>
+    <p id="transferred" class="text-3xl font-bold text-red-500 mt-2"></p>
+  </div>
+  <div class="bg-white rounded-xl shadow-md p-6 text-center">
+    <h3 class="text-lg font-bold text-gray-600">Terminated</h3>
+    <p id="terminated" class="text-3xl font-bold text-red-600 mt-2"></p>
+  </div>
+  <div class="bg-white rounded-xl shadow-md p-6 text-center">
+    <h3 class="text-lg font-bold text-gray-600"></h3>
+    <p id="terminated" class="text-3xl font-bold text-red-600 mt-2"></p>
+  </div>
+  
+
+</div>
+<div class="bg-yellow-100 p-4 rounded-md shadow-lg mt-10">
+    <p class="text-lg text-gray-800 font-medium">
+        <span class="font-bold text-green-600">Note:</span> Data for Annual Leave, Transferred, and Terminated records is available only for the last 2 months starting from today's date.
+    </p>
+    
+</div>
+  </main>
+
+  <script>
+    const API_URL_SHEET3 = "https://script.google.com/macros/s/AKfycbx5KIMR4UjetwzZE4uKWedvxkJYYAdClH5MeB9xiZjbSEOMIMHQtnGbncCd_iFtM4Tt/exec?sheet=sheet3";
+    const API_URL_SHEET4 = "https://script.google.com/macros/s/AKfycbx5KIMR4UjetwzZE4uKWedvxkJYYAdClH5MeB9xiZjbSEOMIMHQtnGbncCd_iFtM4Tt/exec?sheet=sheet4";
+  
+ // Password Modal Logic
+window.onload = function () {
+  const modal = document.getElementById("passwordModal");
+  const passwordInput = document.getElementById("passwordInput");
+  const submitPassword = document.getElementById("submitPassword");
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  const isAuthenticated = localStorage.getItem("authenticated") === "true";
+
+  if (!isAuthenticated) {
+    modal.style.display = "flex";
+  } else {
+    modal.style.display = "none";
+    logoutBtn.classList.remove("hidden");
+  }
+
+  function authenticate() {
+    if (passwordInput.value === "123123") {
+      localStorage.setItem("authenticated", "true");
+      modal.style.display = "none";
+      logoutBtn.classList.remove("hidden");
+    } else {
+      alert("Wrong password");
+    }
+  }
+
+  submitPassword.addEventListener("click", authenticate);
+
+  passwordInput.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+      authenticate();
+    }
+  });
+
+  logoutBtn.addEventListener("click", function () {
+    localStorage.removeItem("authenticated");
+    location.reload();
+  });
+};
+
+    // Date validation
+    function isWithinLastTwoMonths(dateString) {
+      const today = new Date();
+      const twoMonthsAgo = new Date();
+      twoMonthsAgo.setMonth(today.getMonth() - 2);
+      const recordDate = new Date(dateString);
+      return recordDate >= twoMonthsAgo && recordDate <= today;
+    }
+  
+    // Fetch Functions (same as before)
+    async function fetchTotalManpowerData() {
+      try {
+        const res = await fetch(API_URL_SHEET3);
+        const data = await res.json();
+        const totalManpowerEntry = data.find(item => item.Name === "Total Manpower");
+        document.getElementById('totalManpower').innerText = totalManpowerEntry?.ID || 'Data not available';
+      } catch (error) {
+        console.error("Error fetching Total Manpower:", error);
+        document.getElementById('totalManpower').innerText = 'Error';
+      }
+    }
+  
+    async function fetchUpcomingLeaveData() {
+      try {
+        const res = await fetch(API_URL_SHEET4);
+        const data = await res.json();
+        const upcomingLeaveCount = data.filter(item => item.Status === "Upcoming Leave").length;
+        document.getElementById('upcomingLeave').innerText = upcomingLeaveCount;
+      } catch (error) {
+        console.error("Error fetching Upcoming Leave:", error);
+        document.getElementById('upcomingLeave').innerText = 'Error';
+      }
+    }
+  
+    async function fetchAnnualLeaveData() {
+      try {
+        const res = await fetch(API_URL_SHEET4);
+        const data = await res.json();
+        const annualLeaveCount = data.filter(item =>
+          item.Status === "Annual Leave" && isWithinLastTwoMonths(item.Date)
+        ).length;
+        document.getElementById('annualLeave').innerText = annualLeaveCount;
+      } catch (error) {
+        console.error("Error fetching Annual Leave:", error);
+        document.getElementById('annualLeave').innerText = 'Error';
+      }
+    }
+  
+    async function fetchTransferredData() {
+      try {
+        const res = await fetch(API_URL_SHEET4);
+        const data = await res.json();
+        const transferredCount = data.filter(item => {
+          const status = item.Status?.trim().toLowerCase();
+          const date = item.Date ? new Date(item.Date) : null;
+          return status === "transfer out" && date && isWithinLastTwoMonths(date);
+        }).length;
+        document.getElementById('transferred').innerText = transferredCount;
+      } catch (error) {
+        console.error("Error fetching Transferred:", error);
+        document.getElementById('transferred').innerText = 'Error';
+      }
+    }
+  
+    async function fetchTerminatedData() {
+      try {
+        const res = await fetch(API_URL_SHEET4);
+        const data = await res.json();
+        const terminatedCount = data.filter(item =>
+          item.Status === "Terminate" && isWithinLastTwoMonths(item.Date)
+        ).length;
+        document.getElementById('terminated').innerText = terminatedCount;
+      } catch (error) {
+        console.error("Error fetching Terminated:", error);
+        document.getElementById('terminated').innerText = 'Error';
+      }
+    }
+  
+    // Fetch all data
+    fetchTotalManpowerData();
+    fetchUpcomingLeaveData();
+    fetchAnnualLeaveData();
+    fetchTransferredData();
+    fetchTerminatedData();
+  </script>
+  
+</body>
+</html>

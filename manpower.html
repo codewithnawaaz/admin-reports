@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manpower Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+  <nav class="bg-white shadow-md mb-6 ">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold text-blue-600">👷 Manpower Dashboard</h1>
+      <div class="space-x-4">
+        <a href="index.html" class="text-gray-700 hover:text-blue-600 font-medium">Home</a>
+        <a href="Reports.html" class="text-gray-700 hover:text-blue-600 font-medium">Reports</a>
+        <a href="manpower.html" class="text-gray-700 hover:text-blue-600 font-medium">ActiveManpower</a>
+        <a href="leave.html" class="text-gray-700 hover:text-blue-600 font-medium">Transfer/Leave</a>
+      </div>
+    </div>
+  </nav>
+  <div class="container mx-auto p-4">
+    <h1 class="text-2xl font-bold mb-4">Active Manpower RedSea HC-03</h1>
+
+    <input type="text" id="searchInput" onkeyup="handleSearch()" placeholder="Search by ID..."
+      class="mb-4 p-2 border rounded w-full" />
+
+    <div id="loading" class="text-gray-600">Loading data...</div>
+
+    <div class="bg-white p-4 rounded-xl shadow-md">
+      <table class="w-full text-sm text-left">
+        <thead class="font-bold text-gray-600 border-b" id="table-head"></thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbx5KIMR4UjetwzZE4uKWedvxkJYYAdClH5MeB9xiZjbSEOMIMHQtnGbncCd_iFtM4Tt/exec?sheet=Sheet3';
+    let fullData = [];
+
+    async function fetchData() {
+      try {
+        const response = await fetch(API_URL);
+        const data = await response.json();
+        fullData = data;
+        document.getElementById("loading").style.display = "none";
+        renderTable(data);
+      } catch (error) {
+        document.getElementById("loading").innerText = "Error loading data.";
+      }
+    }
+
+    function renderTable(data) {
+      const thead = document.getElementById("table-head");
+      const tbody = document.getElementById("table-body");
+
+      if (!Array.isArray(data) || data.length === 0) {
+        tbody.innerHTML = `<tr><td class="p-4" colspan="100%">No data found</td></tr>`;
+        return;
+      }
+
+      const headers = Object.keys(data[0]);
+      thead.innerHTML = `<tr>${headers.map(header => `<th class="py-3 px-4 text-left">${header}</th>`).join('')}</tr>`;
+      tbody.innerHTML = data.map(row => `
+        <tr class="border-b hover:bg-gray-100">
+          ${headers.map(header => `<td class="py-2 px-4">${row[header]}</td>`).join('')}
+        </tr>`).join('');
+    }
+
+    function handleSearch() {
+      const input = document.getElementById("searchInput").value.trim().toLowerCase();
+      if (!input) {
+        renderTable(fullData);
+        return;
+      }
+
+      const filtered = fullData.filter(row => {
+        const id = row['ID'] || row['Id'] || row['id'];
+        return id && id.toString().toLowerCase().includes(input);
+      });
+
+      renderTable(filtered);
+    }
+
+    fetchData();
+  </script>
+</body>
+
+</html>

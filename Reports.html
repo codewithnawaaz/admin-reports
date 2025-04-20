@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manpower Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 min-h-screen">
+
+  <nav class="bg-white shadow-md mb-6 ">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold text-blue-600">👷 Manpower Dashboard</h1>
+      <div class="space-x-4">
+        <a href="index.html" class="text-gray-700 hover:text-blue-600 font-medium">Home</a>
+        <a href="Reports.html" class="text-gray-700 hover:text-blue-600 font-medium">Reports</a>
+        <a href="manpower.html" class="text-gray-700 hover:text-blue-600 font-medium">ActiveManpower</a>
+        <a href="leave.html" class="text-gray-700 hover:text-blue-600 font-medium">Transfer/Leave</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Daily Report Section -->
+  <div class="max-w-7xl mx-auto mb-12">
+    <h1 class="text-3xl font-bold mb-6 text-center">
+    
+      📊 Daily Report 
+      
+    </h1>
+  </div>
+  >
+  
+
+    <!-- Summary Cards -->
+    <div id="summary-cards" class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6 text-center">
+      <div class="bg-blue-100 text-blue-900 rounded-lg p-4 shadow">
+        <h2 class="text-lg font-semibold">Total Manpower</h2>
+        <p id="total-manpower" class="text-2xl font-bold">0</p>
+      </div>
+      <div class="bg-red-100 text-red-900 rounded-lg p-4 shadow">
+        <h2 class="text-lg font-semibold">Absent</h2>
+        <p id="absent" class="text-2xl font-bold">0</p>
+      </div>
+      <div class="bg-green-100 text-green-900 rounded-lg p-4 shadow">
+        <h2 class="text-lg font-semibold">Total (Including Subcontractor)</h2>
+        <p id="available" class="text-2xl font-bold">0</p>
+      </div>
+      <div class="bg-yellow-100 text-yellow-900 rounded-lg p-4 shadow">
+        <h2 class="text-lg font-semibold">Subcontractor</h2>
+        <p id="subcontractor" class="text-2xl font-bold">0</p>
+      </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="flex justify-center gap-4 mb-6">
+      <input type="date" id="date-filter" onchange="filterByDate(this.value)" class="p-2 border border-gray-300 rounded">
+    </div>
+
+    <!-- Table -->
+    <div class="overflow-x-auto bg-white shadow-md rounded-lg mb-12">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-100 text-sm text-gray-600">
+          <tr id="table-head"></tr>
+        </thead>
+        <tbody id="table-body" class="text-sm divide-y divide-gray-200"></tbody>
+      </table>
+      <div id="message" class="text-center text-red-500 mt-4 font-semibold"></div>
+    </div>
+  </div>
+
+  <!-- Weekly Report Section -->
+  <div class="max-w-7xl mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-2 text-center">📊 Weekly Report</h1>
+    <p id="report-date" class="text-center text-gray-600 mb-6"></p>
+
+    <div class="overflow-x-auto bg-white rounded-xl shadow-md">
+      <table class="min-w-full table-auto border border-gray-300 text-sm">
+        <thead class="bg-gray-200">
+          <tr id="report-table-head"></tr>
+        </thead>
+        <tbody id="report-table-body" class="bg-white"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbx5KIMR4UjetwzZE4uKWedvxkJYYAdClH5MeB9xiZjbSEOMIMHQtnGbncCd_iFtM4Tt/exec";
+    let fullData = [];
+
+    async function fetchData() {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+      fullData = data.map(d => ({ ...d, Date: new Date(d.Date) }));
+      populateDateFilter();
+      filterByDate(getTodayDate());
+      fetchManpowerData(); // Fetch additional report data
+    }
+
+    function populateDateFilter() {
+      const dateSelect = document.getElementById('date-filter');
+      const dateMap = {};
+
+      fullData.forEach(entry => {
+        const dateStr = entry.Date.toISOString().split('T')[0];
+        if (!dateMap[dateStr]) {
+          dateMap[dateStr] = true;
+        }
+      });
+
+      const uniqueDates = Object.keys(dateMap).sort().reverse();
+
+      dateSelect.innerHTML = uniqueDates.map(date => {
+        const displayDate = new Date(date).toLocaleDateString();
+        return `<option value="${date}" ${date === getTodayDate() ? 'selected' : ''}>${displayDate}</option>`;
+      }).join('');
+    }
+
+    function getTodayDate() {
+      const today = new Date();
+      return today.toISOString().split('T')[0];
+    }
+
+    function filterByDate(dateStr) {
+      const selectedDate = new Date(dateStr);
+      const filtered = fullData.filter(entry => {
+        const entryDate = new Date(entry.Date);
+        return entryDate.toDateString() === selectedDate.toDateString();
+      });
+      renderTable(filtered);
+    }
+
+    function renderTable(data) {
+      const tableHead = document.getElementById("table-head");
+      const tableBody = document.getElementById("table-body");
+      const msgDiv = document.getElementById("message");
+
+      const totalEl = document.getElementById("total-manpower");
+      const absentEl = document.getElementById("absent");
+      const availableEl = document.getElementById("available");
+      const subcontractorEl = document.getElementById("subcontractor");
+
+      if (!data.length) {
+        tableHead.innerHTML = "";
+        tableBody.innerHTML = "";
+        msgDiv.textContent = "No data found.";
+        totalEl.textContent = "0";
+        absentEl.textContent = "0";
+        availableEl.textContent = "0";
+        subcontractorEl.textContent = "0";
+        return;
+      }
+
+      const latest = data[0];
+      const keys = Object.keys(latest);
+
+      const total = +latest.TotalManpower || 0;
+      const absent = +latest.Absent || 0;
+      const subcontractor = +latest.Other_Subcontractor || 0;
+      const available = total - absent + subcontractor;
+
+      totalEl.textContent = total;
+      absentEl.textContent = absent;
+      availableEl.textContent = available;
+      subcontractorEl.textContent = subcontractor;
+
+      tableHead.innerHTML = keys.map(key =>
+        `<th class="px-4 py-2 whitespace-nowrap">${key}</th>`
+      ).join('');
+
+      tableBody.innerHTML = data.map(row => {
+        return `<tr class="hover:bg-gray-100">` +
+          keys.map(key =>
+            `<td class="px-4 py-2 text-center">${key === 'Date' ? new Date(row[key]).toLocaleDateString() : row[key]}</td>`
+          ).join('') +
+          `</tr>`;
+      }).join('');
+    }
+
+    async function fetchManpowerData() {
+      try {
+        const response = await fetch(API_URL + "?sheet=Sheet2");
+        const data = await response.json();
+
+        if (!data || data.length === 0) {
+          document.getElementById("report-date").textContent = "No data found.";
+          return;
+        }
+
+        // Show the date from the first object
+        const reportDate = data[0]["Date"];
+        document.getElementById("report-date").textContent = `Date: ${reportDate || 'No date available'}`;
+
+        // Get all keys except "Date"
+        const headers = Object.keys(data[0]).filter(key => key !== "Date");
+
+        // Build table header
+        const headRow = document.getElementById("report-table-head");
+        headers.forEach(header => {
+          const th = document.createElement("th");
+          th.className = "px-4 py-2 border font-semibold whitespace-nowrap";
+          th.textContent = header.trim();
+          headRow.appendChild(th);
+        });
+
+        // Build table rows
+        const tbody = document.getElementById("report-table-body");
+        data.forEach(row => {
+          const tr = document.createElement("tr");
+          tr.className = "hover:bg-gray-50";
+
+          headers.forEach(header => {
+            const td = document.createElement("td");
+            td.className = "px-4 py-2 border text-center whitespace-nowrap";
+            const value = row[header];
+            td.textContent = value === "" ? "-" : value;
+            tr.appendChild(td);
+          });
+
+          tbody.appendChild(tr);
+        });
+
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        document.getElementById("report-date").textContent = "Error fetching data.";
+      }
+    }
+
+    fetchData();
+  </script>
+</body>
+</html>
