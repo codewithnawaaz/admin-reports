@@ -65,12 +65,12 @@
       <table id="leaveTable" class="w-full text-sm text-left text-gray-800">
         <thead class="bg-blue-50 text-xs uppercase font-bold text-blue-700">
           <tr>
-            <th class="px-1 py-2 whitespace-normal">Date</th>
-            <th class="px-1 py-2 whitespace-normal">Name</th>
-            <th class="px-1 py-2 whitespace-normal">ID</th>
-            <th class="px-1 py-2 whitespace-normal">Position</th>
-            <th class="px-1 py-2 whitespace-normal">Status</th>
-            <th class="px-1 py-2 whitespace-normal">Remark</th>
+            <th class="px-1 py-2 whitespace-nowrap">Date</th>
+            <th class="px-1 py-2 whitespace-nowrap">Name</th>
+            <th class="px-1 py-2 whitespace-nowrap">ID</th>
+            <th class="px-1 py-2 whitespace-nowrap">Position</th>
+            <th class="px-1 py-2 whitespace-nowrap">Status</th>
+            <th class="px-1 py-2 whitespace-nowrap">Remark</th>
           </tr>
         </thead>
         <tbody id="leave-table" class="divide-y divide-gray-200 bg-white">
@@ -119,22 +119,22 @@
       const searchInput = document.getElementById("searchInput");
       const statusFilter = document.getElementById("statusFilter");
       let originalData = [...data];
-
+     
       function renderTable(filteredData) {
-        tableBody.innerHTML = "";
-        filteredData.forEach((entry) => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td class="px-2 py-2 whitespace-nowrap">${new Date(entry.Date).toLocaleDateString()}</td>
-            <td class="px-2 py-2 font-semibold whitespace-nowrap">${entry.Name}</td>
-            <td class="px-2 py-2 whitespace-nowrap">${entry.Id}</td>
-            <td class="px-2 py-2 whitespace-nowrap">${entry.position}</td>
-            <td class="px-2 py-2 whitespace-normal break-words ${entry.Status.toLowerCase().includes('upcoming') ? 'text-yellow-600 font-bold' : ''}">${entry.Status}</td>
-            <td class="px-2 py-2 whitespace-normal break-words text-sm text-gray-600">${entry.Remark}</td>
-          `;
-          tableBody.appendChild(row);
-        });
-      }
+  tableBody.innerHTML = "";
+  filteredData.forEach((entry) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td class="px-2 py-2 whitespace-nowrap">${new Date(entry.Date).toLocaleDateString()}</td>
+      <td class="px-2 py-2 font-semibold whitespace-nowrap">${entry.Name}</td>
+      <td class="px-2 py-2 whitespace-nowrap">${entry.Id}</td>
+      <td class="px-2 py-2 whitespace-nowrap">${entry.position}</td>
+      <td class="px-2 py-2 whitespace-nowrap ${entry.Status.toLowerCase().includes('upcoming') ? 'text-yellow-600 font-bold' : ''}">${entry.Status}</td>
+      <td class="px-2 py-2 text-sm text-gray-600 whitespace-nowrap overflow-hidden text-ellipsis max-w-[200px]" title="${entry.Remark}">${entry.Remark}</td>
+    `;
+    tableBody.appendChild(row);
+  });
+}
 
       // Filters
       function applyFilters() {
