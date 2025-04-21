@@ -185,7 +185,10 @@ window.onload = function () {
     location.reload();
   });
 };
-
+logoutBtnMobile.addEventListener("click", function () {
+  localStorage.removeItem("authenticated");
+  location.reload();
+});
     // Date validation
     function isWithinLastTwoMonths(dateString) {
       const today = new Date();
