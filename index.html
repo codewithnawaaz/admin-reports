@@ -147,11 +147,13 @@
     const API_URL_SHEET4 = "https://script.google.com/macros/s/AKfycbx5KIMR4UjetwzZE4uKWedvxkJYYAdClH5MeB9xiZjbSEOMIMHQtnGbncCd_iFtM4Tt/exec?sheet=sheet4";
   
  // Password Modal Logic
-window.onload = function () {
+ 
+ window.onload = function () {
   const modal = document.getElementById("passwordModal");
   const passwordInput = document.getElementById("passwordInput");
   const submitPassword = document.getElementById("submitPassword");
   const logoutBtn = document.getElementById("logoutBtn");
+  const logoutBtnMobile = document.getElementById("logoutBtnMobile"); // 👈 yeh line important hai
 
   const isAuthenticated = localStorage.getItem("authenticated") === "true";
 
@@ -160,6 +162,7 @@ window.onload = function () {
   } else {
     modal.style.display = "none";
     logoutBtn.classList.remove("hidden");
+    logoutBtnMobile.classList.remove("hidden"); // Optional: agar chhupana tha initially
   }
 
   function authenticate() {
@@ -167,6 +170,7 @@ window.onload = function () {
       localStorage.setItem("authenticated", "true");
       modal.style.display = "none";
       logoutBtn.classList.remove("hidden");
+      logoutBtnMobile.classList.remove("hidden"); // Optional
     } else {
       alert("Wrong password");
     }
@@ -184,11 +188,13 @@ window.onload = function () {
     localStorage.removeItem("authenticated");
     location.reload();
   });
+
+  logoutBtnMobile.addEventListener("click", function () {
+    localStorage.removeItem("authenticated");
+    location.reload();
+  });
 };
-logoutBtnMobile.addEventListener("click", function () {
-  localStorage.removeItem("authenticated");
-  location.reload();
-});
+
     // Date validation
     function isWithinLastTwoMonths(dateString) {
       const today = new Date();

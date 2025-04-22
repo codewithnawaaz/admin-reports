@@ -48,38 +48,35 @@
   
 
   <!-- Daily Report Section -->
-  <div class="max-w-7xl mx-auto mb-12">
-    <h1 class="text-3xl font-bold mb-6 text-center">
-    
+  <div class="max-w-7xl mx-auto mb-2">
+    <h1 class="text-3xl font-bold mt-6 text-center">
       📊 Daily Report 
-      
     </h1>
   </div>
   >
   
-
     <!-- Summary Cards -->
     <div id="summary-cards" class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6 text-center">
       <div class="bg-blue-100 text-blue-900 rounded-lg p-4 shadow">
-        <h2 class="text-lg font-semibold">Total Manpower</h2>
+        <h2 class="text-lg font-semibold">Total Manpower (Si)</h2>
         <p id="total-manpower" class="text-2xl font-bold">0</p>
       </div>
       <div class="bg-red-100 text-red-900 rounded-lg p-4 shadow">
         <h2 class="text-lg font-semibold">Absent</h2>
         <p id="absent" class="text-2xl font-bold">0</p>
       </div>
-      <div class="bg-green-100 text-green-900 rounded-lg p-4 shadow">
-        <h2 class="text-lg font-semibold">Total (Including Subcontractor)</h2>
-        <p id="available" class="text-2xl font-bold">0</p>
-      </div>
       <div class="bg-yellow-100 text-yellow-900 rounded-lg p-4 shadow">
         <h2 class="text-lg font-semibold">Subcontractor</h2>
         <p id="subcontractor" class="text-2xl font-bold">0</p>
       </div>
+      <div class="bg-green-100 text-green-900 rounded-lg p-4 shadow">
+        <h2 class="text-lg font-semibold">Total (Including Subcontractor)</h2>
+        <p id="available" class="text-2xl font-bold">0</p>
+      </div>
     </div>
 
     <!-- Filter -->
-    <div class="flex justify-center gap-4 mb-6">
+    <div class="flex justify-center gap-4 mb-2">
       <input type="date" id="date-filter" onchange="filterByDate(this.value)" class="p-2 border border-gray-300 rounded">
     </div>
 
@@ -96,10 +93,10 @@
   </div>
 
   <!-- Weekly Report Section -->
-  <div class="max-w-7xl mx-auto p-6">
+  <div class="max-w-7xl mx-auto h-[300px]">
+
     <h1 class="text-3xl font-bold mb-2 text-center">📊 Weekly Report</h1>
     <p id="report-date" class="text-center text-gray-600 mb-6"></p>
-
     <div class="overflow-x-auto bg-white rounded-xl shadow-md">
       <table class="min-w-full table-auto border border-gray-300 text-sm">
         <thead class="bg-gray-200">
