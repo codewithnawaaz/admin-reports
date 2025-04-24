@@ -29,7 +29,6 @@
         <a href="reports.html" class="text-gray-700 hover:text-blue-600 font-medium block py-2 md:py-0">Reports</a>
         <a href="manpower.html" class="text-gray-700 hover:text-blue-600 font-medium block py-2 md:py-0">ActiveManpower</a>
         <a href="leave.html" class="text-gray-700 hover:text-blue-600 font-medium block py-2 md:py-0">Transfer/Leave</a>
-       
       </div>
     </div>
     <!-- Mobile Dropdown -->
@@ -38,7 +37,6 @@
       <a href="reports.html" class="block px-4 py-2 text-gray-700 hover:text-blue-600">Reports</a>
       <a href="manpower.html" class="block px-4 py-2 text-gray-700 hover:text-blue-600">ActiveManpower</a>
       <a href="leave.html" class="block px-4 py-2 text-gray-700 hover:text-blue-600">Transfer/Leave</a>
-      <button id="logoutBtnMobile" class="block w-full bg-red-500 text-white px-4 py-2 mt-2 hover:bg-red-600">Logout</button>
     </div>
   </nav>
 
@@ -56,6 +54,7 @@
           <option value="Upcoming Leave">Upcoming Leave</option>
           <option value="Transfer Out">Transfer Out</option>
           <option value="Terminate">Terminate</option>
+          <option value="Resigned">Resigned</option>
         </select>
       </div>
     </div>
@@ -85,14 +84,13 @@
     const burgerIcon = document.getElementById('burgerIcon');
     const closeIcon = document.getElementById('closeIcon');
     const mobileDropdown = document.getElementById('mobileDropdown');
-    const logoutBtnMobile = document.getElementById('logoutBtnMobile');
-  
+
     menuToggle.addEventListener('click', () => {
       mobileDropdown.classList.toggle('hidden');
       burgerIcon.classList.toggle('hidden');
       closeIcon.classList.toggle('hidden');
     });
-  
+
     document.addEventListener('click', (event) => {
       if (!menuToggle.contains(event.target) && !mobileDropdown.contains(event.target)) {
         mobileDropdown.classList.add('hidden');
@@ -100,51 +98,44 @@
         closeIcon.classList.add('hidden');
       }
     });
-  
-    [...mobileDropdown.querySelectorAll('a'), logoutBtnMobile].forEach(el => {
-      el.addEventListener('click', () => {
-        mobileDropdown.classList.add('hidden');
-        burgerIcon.classList.remove('hidden');
-        closeIcon.classList.add('hidden');
-      });
-    });
-  
+
     const API_URL = "https://script.google.com/macros/s/AKfycbx5KIMR4UjetwzZE4uKWedvxkJYYAdClH5MeB9xiZjbSEOMIMHQtnGbncCd_iFtM4Tt/exec?sheet=Sheet4";
-  
+
     async function fetchLeaveData() {
       const res = await fetch(API_URL);
       const data = await res.json();
       const tableBody = document.getElementById("leave-table");
       const searchInput = document.getElementById("searchInput");
       const statusFilter = document.getElementById("statusFilter");
-  
+
       let originalData = [...data];
-  
+
       // 🧮 Create total count container
       const countDisplay = document.createElement('div');
       countDisplay.className = 'text-sm text-right font-semibold text-gray-600 mt-2';
       document.querySelector('.max-w-6xl').appendChild(countDisplay);
-  
+
       function renderTable(filteredData) {
         tableBody.innerHTML = "";
         countDisplay.textContent = `Total Records: ${filteredData.length}`;
-  
+
         if (filteredData.length === 0) {
           const noDataRow = document.createElement("tr");
           noDataRow.innerHTML = `<td colspan="6" class="text-center py-4 text-gray-500 font-medium">No data found</td>`;
           tableBody.appendChild(noDataRow);
           return;
         }
-  
+
         filteredData.forEach((entry) => {
           const row = document.createElement("tr");
-  
+
           // 🎨 Add color highlights
           let statusClass = "";
           if (entry.Status.toLowerCase().includes("upcoming")) statusClass = "text-yellow-600 font-bold";
           else if (entry.Status.toLowerCase().includes("terminate")) statusClass = "text-red-600 font-bold";
           else if (entry.Status.toLowerCase().includes("transfer")) statusClass = "text-purple-600 font-bold";
-  
+          else if (entry.Status.toLowerCase().includes("resigned")) statusClass = "text-red-400 font-bold";
+
           row.innerHTML = `
   <td class="px-2 py-2 whitespace-nowrap">${new Date(entry.Date).toLocaleDateString()}</td>
   <td class="px-2 py-2 font-semibold whitespace-nowrap">${entry.Name}</td>
@@ -157,26 +148,26 @@
           tableBody.appendChild(row);
         });
       }
-  
+
       function applyFilters() {
         const idValue = searchInput.value.trim();
         const statusValue = statusFilter.value.trim().toLowerCase();
-  
+
         const filtered = originalData.filter(entry => {
           const matchesId = !idValue || entry.Id.toString().includes(idValue);
           const matchesStatus = !statusValue || entry.Status.toLowerCase().includes(statusValue);
           return matchesId && matchesStatus;
         });
-  
+
         renderTable(filtered);
       }
-  
+
       searchInput.addEventListener("input", applyFilters);
       statusFilter.addEventListener("change", applyFilters);
-  
+
       renderTable(originalData);
     }
-  
+
     fetchLeaveData();
   </script>
   

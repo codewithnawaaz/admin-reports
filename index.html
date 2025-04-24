@@ -99,6 +99,11 @@
     <h3 class="text-lg font-bold text-gray-600">Terminated</h3>
     <p id="terminated" class="text-3xl font-bold text-red-600 mt-2"></p>
   </div>
+  <div class="bg-white rounded-xl shadow-md p-6 text-center">
+    <h3 class="text-lg font-bold text-gray-600">Resigned</h3>
+    <p id="resigned" class="text-3xl font-bold text-red-600 mt-2"></p>
+  </div>
+
 
   
 
@@ -153,24 +158,28 @@
   const passwordInput = document.getElementById("passwordInput");
   const submitPassword = document.getElementById("submitPassword");
   const logoutBtn = document.getElementById("logoutBtn");
-  const logoutBtnMobile = document.getElementById("logoutBtnMobile"); // 👈 yeh line important hai
+  const logoutBtnMobile = document.getElementById("logoutBtnMobile");
 
-  const isAuthenticated = localStorage.getItem("authenticated") === "true";
+  // Check if the user is authenticated during this session
+  const isAuthenticated = sessionStorage.getItem("authenticated") === "true";
 
-  if (!isAuthenticated) {
-    modal.style.display = "flex";
-  } else {
+  if (isAuthenticated) {
     modal.style.display = "none";
     logoutBtn.classList.remove("hidden");
-    logoutBtnMobile.classList.remove("hidden"); // Optional: agar chhupana tha initially
+    logoutBtnMobile.classList.remove("hidden");
+  } else {
+    modal.style.display = "flex";
+    logoutBtn.classList.add("hidden");
+    logoutBtnMobile.classList.add("hidden");
   }
 
+  // Authenticate function
   function authenticate() {
     if (passwordInput.value === "123123") {
-      localStorage.setItem("authenticated", "true");
+      sessionStorage.setItem("authenticated", "true");  // Store in sessionStorage
       modal.style.display = "none";
       logoutBtn.classList.remove("hidden");
-      logoutBtnMobile.classList.remove("hidden"); // Optional
+      logoutBtnMobile.classList.remove("hidden");
     } else {
       alert("Wrong password");
     }
@@ -184,16 +193,36 @@
     }
   });
 
+  // Logout Button Functionality
   logoutBtn.addEventListener("click", function () {
-    localStorage.removeItem("authenticated");
-    location.reload();
+    sessionStorage.removeItem("authenticated");  // Remove session data on logout
+    modal.style.display = "flex";  // Show password modal again on logout
+    logoutBtn.classList.add("hidden");
+    logoutBtnMobile.classList.add("hidden");
   });
 
   logoutBtnMobile.addEventListener("click", function () {
-    localStorage.removeItem("authenticated");
-    location.reload();
+    sessionStorage.removeItem("authenticated");  // Remove session data on logout
+    modal.style.display = "flex";  // Show password modal again on logout
+    logoutBtn.classList.add("hidden");
+    logoutBtnMobile.classList.add("hidden");
   });
 };
+
+
+  // Logout Button Functionality
+  logoutBtn.addEventListener("click", function () {
+    modal.style.display = "flex"; // Show password modal again on logout
+    logoutBtn.classList.add("hidden");
+    logoutBtnMobile.classList.add("hidden");
+  });
+
+  logoutBtnMobile.addEventListener("click", function () {
+    modal.style.display = "flex"; // Show password modal again on logout
+    logoutBtn.classList.add("hidden");
+    logoutBtnMobile.classList.add("hidden");
+  });
+
 
     // Date validation
     function isWithinLastTwoMonths(dateString) {
@@ -272,6 +301,23 @@
         document.getElementById('terminated').innerText = 'Error';
       }
     }
+
+    async function fetchResignedData() {
+  try {
+    const res = await fetch(API_URL_SHEET4);
+    const data = await res.json();
+
+    const resignedCount = data.filter(item =>
+      item.Status === "Resigned" && isWithinLastTwoMonths(item.Date)
+    ).length;
+
+    document.getElementById('resigned').innerText = resignedCount;
+  } catch (error) {
+    console.error("Error fetching Resigned:", error);
+    document.getElementById('resigned').innerText = 'Error';
+  }
+}
+
   
     // Fetch all data
     fetchTotalManpowerData();
@@ -279,6 +325,7 @@
     fetchAnnualLeaveData();
     fetchTransferredData();
     fetchTerminatedData();
+    fetchResignedData();
   </script>
   
 </body>
