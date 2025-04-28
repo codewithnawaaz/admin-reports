@@ -53,12 +53,12 @@
       📊 Daily Report 
     </h1>
   </div>
-  >
+  
   
     <!-- Summary Cards -->
     <div id="summary-cards" class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6 text-center">
       <div class="bg-blue-100 text-blue-900 rounded-lg p-4 shadow">
-        <h2 class="text-lg font-semibold">Total Manpower (Si)</h2>
+        <h2 class="text-lg font-semibold">Saudi_Icon(Present)</h2>
         <p id="total-manpower" class="text-2xl font-bold">0</p>
       </div>
       <div class="bg-red-100 text-red-900 rounded-lg p-4 shadow">
@@ -70,7 +70,7 @@
         <p id="subcontractor" class="text-2xl font-bold">0</p>
       </div>
       <div class="bg-green-100 text-green-900 rounded-lg p-4 shadow">
-        <h2 class="text-lg font-semibold">Total (Including Subcontractor)</h2>
+        <h2 class="text-lg font-bold">Total(Si+Subcontractos)</h2>
         <p id="available" class="text-2xl font-bold">0</p>
       </div>
     </div>
@@ -208,9 +208,10 @@
       const keys = Object.keys(latest);
 
       const total = +latest.TotalManpower || 0;
-      const absent = +latest.Absent || 0;
-      const subcontractor = +latest.Other_Subcontractor || 0;
-      const available = total + subcontractor;
+const absent = +latest.Absent || 0;
+const subcontractor = +latest.Other_Subcontractor || 0;
+const available = total - absent + subcontractor;
+
 
       totalEl.textContent = total;
       absentEl.textContent = absent;

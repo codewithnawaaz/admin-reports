@@ -60,23 +60,25 @@
     </div>
 
     <!-- Table Section -->
-    <div class="bg-white shadow-lg rounded-lg overflow-x-auto border">
-      <table id="leaveTable" class="w-full text-sm text-left text-gray-800">
-        <thead class="bg-blue-50 text-xs uppercase font-bold text-blue-700">
-          <tr>
-            <th class="px-1 py-2 whitespace-nowrap">Date</th>
-            <th class="px-1 py-2 whitespace-nowrap">Name</th>
-            <th class="px-1 py-2 whitespace-nowrap">ID</th>
-            <th class="px-1 py-2 whitespace-nowrap">Position</th>
-            <th class="px-1 py-2 whitespace-nowrap">Status</th>
-            <th class="px-1 py-2 whitespace-nowrap">Remark</th>
-          </tr>
-        </thead>
-        <tbody id="leave-table" class="divide-y divide-gray-200 bg-white">
-          <!-- Dynamic Rows -->
-        </tbody>
-      </table>
-    </div>
+   <!-- Table Section -->
+<div class="bg-white shadow-lg rounded-lg overflow-x-auto border">
+  <table id="leaveTable" class="w-full text-sm text-left text-gray-800">
+    <thead class="bg-blue-50 text-xs uppercase font-bold text-blue-700">
+      <tr>
+        <th class="px-1 py-2 whitespace-nowrap hidden md:table-cell">Date</th>
+        <th class="px-1 py-2 whitespace-nowrap">Name</th>
+        <th class="px-1 py-2 whitespace-nowrap">ID</th>
+        <th class="px-1 py-2 whitespace-nowrap hidden md:table-cell">Position</th>
+        <th class="px-1 py-2 whitespace-nowrap hidden md:table-cell">Status</th>
+        <th class="px-1 py-2 whitespace-nowrap">Remark</th>
+      </tr>
+    </thead>
+    <tbody id="leave-table" class="divide-y divide-gray-200 bg-white">
+      <!-- Dynamic Rows -->
+    </tbody>
+  </table>
+</div>
+
   </div>
 
   <script>
@@ -116,38 +118,39 @@
       document.querySelector('.max-w-6xl').appendChild(countDisplay);
 
       function renderTable(filteredData) {
-        tableBody.innerHTML = "";
-        countDisplay.textContent = `Total Records: ${filteredData.length}`;
+  tableBody.innerHTML = "";
+  countDisplay.textContent = `Total Records: ${filteredData.length}`;
 
-        if (filteredData.length === 0) {
-          const noDataRow = document.createElement("tr");
-          noDataRow.innerHTML = `<td colspan="6" class="text-center py-4 text-gray-500 font-medium">No data found</td>`;
-          tableBody.appendChild(noDataRow);
-          return;
-        }
+  if (filteredData.length === 0) {
+    const noDataRow = document.createElement("tr");
+    noDataRow.innerHTML = `<td colspan="6" class="text-center py-4 text-gray-500 font-medium">No data found</td>`;
+    tableBody.appendChild(noDataRow);
+    return;
+  }
 
-        filteredData.forEach((entry) => {
-          const row = document.createElement("tr");
+  filteredData.forEach((entry) => {
+    const row = document.createElement("tr");
 
-          // 🎨 Add color highlights
-          let statusClass = "";
-          if (entry.Status.toLowerCase().includes("upcoming")) statusClass = "text-yellow-600 font-bold";
-          else if (entry.Status.toLowerCase().includes("terminate")) statusClass = "text-red-600 font-bold";
-          else if (entry.Status.toLowerCase().includes("transfer")) statusClass = "text-purple-600 font-bold";
-          else if (entry.Status.toLowerCase().includes("resigned")) statusClass = "text-red-400 font-bold";
+    let statusClass = "";
+    if (entry.Status.toLowerCase().includes("upcoming")) statusClass = "text-yellow-600 font-bold";
+    else if (entry.Status.toLowerCase().includes("terminate")) statusClass = "text-red-600 font-bold";
+    else if (entry.Status.toLowerCase().includes("transfer")) statusClass = "text-purple-600 font-bold";
+    else if (entry.Status.toLowerCase().includes("resigned")) statusClass = "text-red-400 font-bold";
 
-          row.innerHTML = `
-  <td class="px-2 py-2 whitespace-nowrap">${new Date(entry.Date).toLocaleDateString()}</td>
-  <td class="px-2 py-2 font-semibold whitespace-nowrap">${entry.Name}</td>
-  <td class="px-2 py-2 whitespace-nowrap">${entry.Id}</td>
-  <td class="px-2 py-2 whitespace-nowrap">${entry.position}</td>
-  <td class="px-2 py-2 whitespace-nowrap ${statusClass}">${entry.Status}</td>
-  <td class="px-2 py-2 text-sm text-gray-600 whitespace-nowrap overflow-x-auto max-w-[300px] md:max-w-none">${entry.Remark}</td>
-`;
+    row.innerHTML = `
+      <td class="px-2 py-2 whitespace-nowrap hidden md:table-cell">${new Date(entry.Date).toLocaleDateString()}</td>
+      <td class="px-2 py-2 font-semibold whitespace-nowrap">${entry.Name}</td>
+      <td class="px-2 py-2 whitespace-nowrap">${entry.Id}</td>
+      <td class="px-2 py-2 whitespace-nowrap hidden md:table-cell">${entry.position}</td>
+      <td class="px-2 py-2 whitespace-nowrap hidden md:table-cell ${statusClass}">${entry.Status}</td>
+      <td class="px-2 py-2 text-sm text-gray-600 whitespace-normal break-words">${entry.Remark}</td>
 
-          tableBody.appendChild(row);
-        });
-      }
+    `;
+
+    tableBody.appendChild(row);
+  });
+}
+
 
       function applyFilters() {
         const idValue = searchInput.value.trim();
