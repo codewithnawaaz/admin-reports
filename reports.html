@@ -210,7 +210,7 @@
       const total = +latest.TotalManpower || 0;
 const absent = +latest.Absent || 0;
 const subcontractor = +latest.Other_Subcontractor || 0;
-const available = total - absent + subcontractor;
+const available = total  + subcontractor;
 
 
       totalEl.textContent = total;
