@@ -55,6 +55,7 @@
           <option value="Transfer Out">Transfer Out</option>
           <option value="Terminate">Terminate</option>
           <option value="Resigned">Resigned</option>
+          <option value="Sanctioned Leave">Sanctioned Leave</option>
         </select>
       </div>
     </div>
@@ -136,6 +137,8 @@
     else if (entry.Status.toLowerCase().includes("terminate")) statusClass = "text-red-600 font-bold";
     else if (entry.Status.toLowerCase().includes("transfer")) statusClass = "text-purple-600 font-bold";
     else if (entry.Status.toLowerCase().includes("resigned")) statusClass = "text-red-400 font-bold";
+    else if (entry.Status.toLowerCase().includes("sanctioned")) statusClass = "text-green-500 font-bold";
+    else if (entry.Status.toLowerCase().includes("annual")) statusClass = "text-teal-500 font-bold";
 
     row.innerHTML = `
       <td class="px-2 py-2 whitespace-nowrap hidden md:table-cell">${new Date(entry.Date).toLocaleDateString()}</td>
