@@ -12,18 +12,15 @@
     <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
       <h1 class="text-2xl font-bold text-blue-600">👷 Manpower Dashboard</h1>
       <button id="menuToggle" class="md:hidden text-gray-700 focus:outline-none">
-        <!-- Burger Icon -->
         <svg id="burgerIcon" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
           viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
           <path d="M4 6h16M4 12h16M4 18h16" />
         </svg>
-        <!-- Cross Icon -->
         <svg id="closeIcon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" stroke-width="2"
           viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
           <path d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
-      <!-- Desktop Menu -->
       <div id="menuLinks" class="hidden md:flex flex-col md:flex-row md:items-center md:space-x-4 mt-4 md:mt-0">
         <a href="index.html" class="text-gray-700 hover:text-blue-600 font-medium block py-2 md:py-0">Home</a>
         <a href="reports.html" class="text-gray-700 hover:text-blue-600 font-medium block py-2 md:py-0">Reports</a>
@@ -31,7 +28,6 @@
         <a href="leave.html" class="text-gray-700 hover:text-blue-600 font-medium block py-2 md:py-0">Transfer/Leave</a>
       </div>
     </div>
-    <!-- Mobile Dropdown -->
     <div id="mobileDropdown" class="md:hidden absolute left-0 right-0 bg-white shadow-lg hidden">
       <a href="index.html" class="block px-4 py-2 text-gray-700 hover:text-blue-600">Home</a>
       <a href="reports.html" class="block px-4 py-2 text-gray-700 hover:text-blue-600">Reports</a>
@@ -41,7 +37,6 @@
   </nav>
 
   <div class="max-w-6xl mx-auto space-y-8 px-4 py-6">
-    <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
       <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800">Leave Status Dashboard</h1>
       <div class="flex gap-2 items-center flex-wrap">
@@ -57,29 +52,28 @@
           <option value="Resigned">Resigned</option>
           <option value="Sanctioned Leave">Sanctioned Leave</option>
         </select>
+        <input id="remarkSearch" type="text" placeholder="Search by Remark"
+          class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
       </div>
     </div>
 
-    <!-- Table Section -->
-   <!-- Table Section -->
-<div class="bg-white shadow-lg rounded-lg overflow-x-auto border">
-  <table id="leaveTable" class="w-full text-sm text-left text-gray-800">
-    <thead class="bg-blue-50 text-xs uppercase font-bold text-blue-700">
-      <tr>
-        <th class="px-1 py-2 whitespace-nowrap hidden md:table-cell">Date</th>
-        <th class="px-1 py-2 whitespace-nowrap">Name</th>
-        <th class="px-1 py-2 whitespace-nowrap">ID</th>
-        <th class="px-1 py-2 whitespace-nowrap hidden md:table-cell">Position</th>
-        <th class="px-1 py-2 whitespace-nowrap hidden md:table-cell">Status</th>
-        <th class="px-1 py-2 whitespace-nowrap">Remark</th>
-      </tr>
-    </thead>
-    <tbody id="leave-table" class="divide-y divide-gray-200 bg-white">
-      <!-- Dynamic Rows -->
-    </tbody>
-  </table>
-</div>
-
+    <div class="bg-white shadow-lg rounded-lg overflow-x-auto border">
+      <table id="leaveTable" class="w-full text-sm text-left text-gray-800">
+        <thead class="bg-blue-50 text-xs uppercase font-bold text-blue-700">
+          <tr>
+            <th class="px-1 py-2 whitespace-nowrap hidden md:table-cell">Date</th>
+            <th class="px-1 py-2 whitespace-nowrap">Name</th>
+            <th class="px-1 py-2 whitespace-nowrap">ID</th>
+            <th class="px-1 py-2 whitespace-nowrap hidden md:table-cell">Position</th>
+            <th class="px-1 py-2 whitespace-nowrap hidden md:table-cell">Status</th>
+            <th class="px-1 py-2 whitespace-nowrap">Remark</th>
+          </tr>
+        </thead>
+        <tbody id="leave-table" class="divide-y divide-gray-200 bg-white">
+          <!-- Dynamic Rows -->
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <script>
@@ -110,59 +104,59 @@
       const tableBody = document.getElementById("leave-table");
       const searchInput = document.getElementById("searchInput");
       const statusFilter = document.getElementById("statusFilter");
+      const remarkSearch = document.getElementById("remarkSearch");
 
       let originalData = [...data];
 
-      // 🧮 Create total count container
       const countDisplay = document.createElement('div');
       countDisplay.className = 'text-sm text-right font-semibold text-gray-600 mt-2';
       document.querySelector('.max-w-6xl').appendChild(countDisplay);
 
       function renderTable(filteredData) {
-  tableBody.innerHTML = "";
-  countDisplay.textContent = `Total Records: ${filteredData.length}`;
+        tableBody.innerHTML = "";
+        countDisplay.textContent = `Total Records: ${filteredData.length}`;
 
-  if (filteredData.length === 0) {
-    const noDataRow = document.createElement("tr");
-    noDataRow.innerHTML = `<td colspan="6" class="text-center py-4 text-gray-500 font-medium">No data found</td>`;
-    tableBody.appendChild(noDataRow);
-    return;
-  }
+        if (filteredData.length === 0) {
+          const noDataRow = document.createElement("tr");
+          noDataRow.innerHTML = `<td colspan="6" class="text-center py-4 text-gray-500 font-medium">No data found</td>`;
+          tableBody.appendChild(noDataRow);
+          return;
+        }
 
-  filteredData.forEach((entry) => {
-    const row = document.createElement("tr");
+        filteredData.forEach((entry) => {
+          const row = document.createElement("tr");
 
-    let statusClass = "";
-    if (entry.Status.toLowerCase().includes("upcoming")) statusClass = "text-yellow-600 font-bold";
-    else if (entry.Status.toLowerCase().includes("terminate")) statusClass = "text-red-600 font-bold";
-    else if (entry.Status.toLowerCase().includes("transfer")) statusClass = "text-purple-600 font-bold";
-    else if (entry.Status.toLowerCase().includes("resigned")) statusClass = "text-red-400 font-bold";
-    else if (entry.Status.toLowerCase().includes("sanctioned")) statusClass = "text-green-500 font-bold";
-    else if (entry.Status.toLowerCase().includes("annual")) statusClass = "text-teal-500 font-bold";
+          let statusClass = "";
+          if (entry.Status.toLowerCase().includes("upcoming")) statusClass = "text-yellow-600 font-bold";
+          else if (entry.Status.toLowerCase().includes("terminate")) statusClass = "text-red-600 font-bold";
+          else if (entry.Status.toLowerCase().includes("transfer")) statusClass = "text-purple-600 font-bold";
+          else if (entry.Status.toLowerCase().includes("resigned")) statusClass = "text-red-400 font-bold";
+          else if (entry.Status.toLowerCase().includes("sanctioned")) statusClass = "text-green-500 font-bold";
+          else if (entry.Status.toLowerCase().includes("annual")) statusClass = "text-teal-500 font-bold";
 
-    row.innerHTML = `
-      <td class="px-2 py-2 whitespace-nowrap hidden md:table-cell">${new Date(entry.Date).toLocaleDateString()}</td>
-      <td class="px-2 py-2 font-semibold whitespace-nowrap">${entry.Name}</td>
-      <td class="px-2 py-2 whitespace-nowrap">${entry.Id}</td>
-      <td class="px-2 py-2 whitespace-nowrap hidden md:table-cell">${entry.position}</td>
-      <td class="px-2 py-2 whitespace-nowrap hidden md:table-cell ${statusClass}">${entry.Status}</td>
-      <td class="px-2 py-2 text-sm text-gray-600 whitespace-normal break-words">${entry.Remark}</td>
+          row.innerHTML = `
+            <td class="px-2 py-2 whitespace-nowrap hidden md:table-cell">${new Date(entry.Date).toLocaleDateString()}</td>
+            <td class="px-2 py-2 font-semibold whitespace-nowrap">${entry.Name}</td>
+            <td class="px-2 py-2 whitespace-nowrap">${entry.Id}</td>
+            <td class="px-2 py-2 whitespace-nowrap hidden md:table-cell">${entry.position}</td>
+            <td class="px-2 py-2 whitespace-nowrap hidden md:table-cell ${statusClass}">${entry.Status}</td>
+            <td class="px-2 py-2 text-sm text-gray-600 whitespace-normal break-words">${entry.Remark}</td>
+          `;
 
-    `;
-
-    tableBody.appendChild(row);
-  });
-}
-
+          tableBody.appendChild(row);
+        });
+      }
 
       function applyFilters() {
         const idValue = searchInput.value.trim();
         const statusValue = statusFilter.value.trim().toLowerCase();
+        const remarkValue = remarkSearch.value.trim().toLowerCase();
 
         const filtered = originalData.filter(entry => {
           const matchesId = !idValue || entry.Id.toString().includes(idValue);
           const matchesStatus = !statusValue || entry.Status.toLowerCase().includes(statusValue);
-          return matchesId && matchesStatus;
+          const matchesRemark = !remarkValue || entry.Remark.toLowerCase().includes(remarkValue);
+          return matchesId && matchesStatus && matchesRemark;
         });
 
         renderTable(filtered);
@@ -170,12 +164,12 @@
 
       searchInput.addEventListener("input", applyFilters);
       statusFilter.addEventListener("change", applyFilters);
+      remarkSearch.addEventListener("input", applyFilters);
 
       renderTable(originalData);
     }
 
     fetchLeaveData();
   </script>
-  
 </body>
 </html>
