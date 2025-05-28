@@ -1,20 +1,23 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Leave&Transfer Status Dashboard HC-03</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
 </head>
+
 <body class="bg-gradient-to-br from-gray-100 to-white min-h-screen font-sans relative">
   <!-- Navbar -->
   <nav class="bg-white shadow-md relative z-50">
     <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
       <h1 class="text-2xl font-bold text-blue-600">👷 Manpower Dashboard</h1>
       <button id="menuToggle" class="md:hidden text-gray-700 focus:outline-none">
-        <svg id="burgerIcon" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
-          viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+        <svg id="burgerIcon" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+          stroke-linecap="round" stroke-linejoin="round">
           <path d="M4 6h16M4 12h16M4 18h16" />
         </svg>
         <svg id="closeIcon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" stroke-width="2"
@@ -25,7 +28,8 @@
       <div id="menuLinks" class="hidden md:flex flex-col md:flex-row md:items-center md:space-x-4 mt-4 md:mt-0">
         <a href="index.html" class="text-gray-700 hover:text-blue-600 font-medium block py-2 md:py-0">Home</a>
         <a href="reports.html" class="text-gray-700 hover:text-blue-600 font-medium block py-2 md:py-0">Reports</a>
-        <a href="manpower.html" class="text-gray-700 hover:text-blue-600 font-medium block py-2 md:py-0">ActiveManpower</a>
+        <a href="manpower.html"
+          class="text-gray-700 hover:text-blue-600 font-medium block py-2 md:py-0">ActiveManpower</a>
         <a href="leave.html" class="text-gray-700 hover:text-blue-600 font-medium block py-2 md:py-0">Transfer/Leave</a>
       </div>
     </div>
@@ -38,13 +42,15 @@
   </nav>
 
   <div class="max-w-6xl mx-auto space-y-8 px-4 py-6">
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800">Leave Status Dashboard</h1>
-      <div class="flex gap-2 items-center flex-wrap">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 flex-wrap">
+      <h1 class="text-2xl md:text-3xl font-extrabold text-gray-800">Leave Status Dashboard</h1>
+
+      <div class="flex flex-wrap gap-2 items-center">
         <input id="searchInput" type="number" placeholder="Search by ID"
-          class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          class="w-36 px-2 py-1 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+
         <select id="statusFilter"
-          class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+          class="w-44 px-2 py-1 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
           <option value="">Filter by Status</option>
           <option value="Annual Leave">Annual Leave</option>
           <option value="Upcoming Leave">Upcoming Leave</option>
@@ -53,10 +59,17 @@
           <option value="Resigned">Resigned</option>
           <option value="Sanctioned Leave">Sanctioned Leave</option>
         </select>
+
         <input id="remarkSearch" type="text" placeholder="Search by Remark"
-          class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          class="w-40 px-2 py-1 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+
+        <button id="exportBtn"
+          class="px-3 py-1.5 text-sm bg-green-500 text-white rounded-md hover:bg-green-600 transition">
+          Export to Excel
+        </button>
       </div>
     </div>
+
 
     <div class="bg-white shadow-lg rounded-lg overflow-x-auto border">
       <table id="leaveTable" class="w-full text-sm text-left text-gray-800">
@@ -123,29 +136,54 @@
           tableBody.appendChild(noDataRow);
           return;
         }
-
         filteredData.forEach((entry) => {
           const row = document.createElement("tr");
 
           let statusClass = "";
-          if (entry.Status.toLowerCase().includes("upcoming")) statusClass = "text-yellow-600 font-bold";
-          else if (entry.Status.toLowerCase().includes("terminate")) statusClass = "text-red-600 font-bold";
-          else if (entry.Status.toLowerCase().includes("transfer")) statusClass = "text-purple-600 font-bold";
-          else if (entry.Status.toLowerCase().includes("resigned")) statusClass = "text-red-400 font-bold";
-          else if (entry.Status.toLowerCase().includes("sanctioned")) statusClass = "text-green-500 font-bold";
-          else if (entry.Status.toLowerCase().includes("annual")) statusClass = "text-teal-500 font-bold";
+          let remarkClass = "";
+          let statusContent = entry.Status;
+          const today = new Date();
+          const leaveDateField = entry["Leave Date"] ? new Date(entry["Leave Date"]) : null;
+
+          const isUpcomingLeave = entry.Status.toLowerCase() === "upcoming leave";
+          const isWithin15Days = isUpcomingLeave && leaveDateField &&
+            (leaveDateField - today >= 0) &&
+            (leaveDateField - today <= 15 * 24 * 60 * 60 * 1000); // 15 din
+
+          if (isWithin15Days) {
+            statusClass = "text-red-600 font-extrabold flex items-center gap-1";
+            remarkClass = "text-red-600 font-semibold";
+            statusContent = `<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="w-4 h-4 inline-block" viewBox="0 0 20 20">
+      <path d="M10.18 9H2a1 1 0 100 2h8.18l1.72 5.15a1 1 0 001.9-.63l-1.14-3.42H17a1 1 0 000-2h-4.34l1.14-3.42a1 1 0 00-1.9-.63L10.18 9z"/>
+    </svg> ${entry.Status}`;
+          } else if (isUpcomingLeave) {
+            statusClass = "text-yellow-600 font-bold";
+            remarkClass = "text-yellow-600 font-medium";
+          } else if (entry.Status.toLowerCase().includes("terminate")) {
+            statusClass = "text-red-600 font-bold";
+          } else if (entry.Status.toLowerCase().includes("transfer")) {
+            statusClass = "text-purple-600 font-bold";
+          } else if (entry.Status.toLowerCase().includes("resigned")) {
+            statusClass = "text-red-400 font-bold";
+          } else if (entry.Status.toLowerCase().includes("sanctioned")) {
+            statusClass = "text-green-500 font-bold";
+          } else if (entry.Status.toLowerCase().includes("annual")) {
+            statusClass = "text-teal-500 font-bold";
+          }
 
           row.innerHTML = `
-            <td class="px-2 py-2 whitespace-nowrap hidden md:table-cell">${new Date(entry.Date).toLocaleDateString()}</td>
-            <td class="px-2 py-2 font-semibold whitespace-nowrap">${entry.Name}</td>
-            <td class="px-2 py-2 whitespace-nowrap">${entry.Id}</td>
-            <td class="px-2 py-2 whitespace-nowrap hidden md:table-cell">${entry.position}</td>
-            <td class="px-2 py-2 whitespace-nowrap hidden md:table-cell ${statusClass}">${entry.Status}</td>
-            <td class="px-2 py-2 text-sm text-gray-600 whitespace-normal break-words">${entry.Remark}</td>
-          `;
+    <td class="px-2 py-2 whitespace-nowrap hidden md:table-cell">${new Date(entry.Date).toLocaleDateString()}</td>
+    <td class="px-2 py-2 whitespace-nowrap">${entry.Name}</td>
+    <td class="px-2 py-2 whitespace-nowrap">${entry.Id}</td>
+    <td class="px-2 py-2 whitespace-nowrap hidden md:table-cell">${entry.position}</td>
+    <td class="px-2 py-2 whitespace-nowrap hidden md:table-cell ${statusClass}">${statusContent}</td>
+    <td class="px-2 py-2 whitespace-nowrap ${remarkClass}">${entry.Remark}</td>
+  `;
 
           tableBody.appendChild(row);
         });
+
+
       }
 
       function applyFilters() {
@@ -171,6 +209,13 @@
     }
 
     fetchLeaveData();
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      const table = document.getElementById("leaveTable");
+      const wb = XLSX.utils.table_to_book(table, { sheet: "Leave Status" });
+      XLSX.writeFile(wb, "Leave_Status");
+    });
+
   </script>
 </body>
+
 </html>
