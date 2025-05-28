@@ -212,7 +212,8 @@
     document.getElementById('exportBtn').addEventListener('click', () => {
       const table = document.getElementById("leaveTable");
       const wb = XLSX.utils.table_to_book(table, { sheet: "Leave Status" });
-      XLSX.writeFile(wb, "Leave_Status");
+     XLSX.writeFile(wb, "Leave_Status.xlsx");
+
     });
 
   </script>
