@@ -6,12 +6,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Manpower Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @media (max-width: 640px) {
+      .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      table {
+        min-width: 600px;
+      }
+      td, th {
+        padding: 8px 4px;
+        font-size: 0.875rem;
+      }
+    }
+  </style>
 </head>
 
 <body class="bg-gray-100">
   <nav class="bg-white shadow-md relative z-50">
     <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-      <h1 class="text-2xl font-bold text-blue-600">👷 Manpower Dashboard</h1>
+      <h1 class="text-xl md:text-2xl font-bold text-blue-600">👷 Manpower Dashboard</h1>
       
       <!-- Toggle Button -->
       <button id="menuToggle" class="md:hidden text-gray-700 focus:outline-none">
@@ -46,14 +61,14 @@
   </nav>
   
   <div class="container mx-auto p-4">
-    <h1 class="text-2xl font-bold mb-4">Active Manpower RedSea HC02, HC03</h1>
+    <h1 class="text-xl md:text-2xl font-bold mb-4">Active Manpower RedSea HC02, HC03</h1>
 
-    <input type="text" id="searchInput" onkeyup="handleSearch()" placeholder="Search by ID..."
-      class="mb-4 p-2 border rounded w-full" />
+    <input type="text" id="searchInput" onkeyup="handleSearch()" placeholder="Search by ID or Name..."
+      class="mb-4 p-2 border rounded w-full max-w-md mx-auto md:mx-0 block" />
 
     <div id="loading" class="text-gray-600">Loading data...</div>
 
-    <div class="bg-white p-4 rounded-xl shadow-md">
+    <div class="bg-white p-4 rounded-xl shadow-md table-container">
       <table class="w-full text-sm text-left">
         <thead class="font-bold text-gray-600 border-b" id="table-head"></thead>
         <tbody id="table-body"></tbody>
@@ -108,10 +123,10 @@
       }
 
       const headers = Object.keys(data[0]);
-      thead.innerHTML = `<tr>${headers.map(header => `<th class="py-3 px-4 text-left">${header}</th>`).join('')}</tr>`;
+      thead.innerHTML = `<tr>${headers.map(header => `<th class="py-3 px-2 md:px-4 text-left whitespace-nowrap">${header}</th>`).join('')}</tr>`;
       tbody.innerHTML = data.map(row => `
-        <tr class="border-b hover:bg-gray-100">
-          ${headers.map(header => `<td class="py-2 px-4">${row[header]}</td>`).join('')}
+        <tr class="border-b hover:bg-gray-50">
+          ${headers.map(header => `<td class="py-2 px-2 md:px-4 whitespace-nowrap">${row[header] || ''}</td>`).join('')}
         </tr>`).join('');
     }
 
@@ -123,8 +138,10 @@
       }
 
       const filtered = fullData.filter(row => {
-        const id = row['ID'] || row['Id'] || row['id'];
-        return id && id.toString().toLowerCase().includes(input);
+        const id = row['ID'] || row['Id'] || row['id'] || '';
+        const name = row['Name'] || row['name'] || '';
+        return id.toString().toLowerCase().includes(input) || 
+               name.toString().toLowerCase().includes(input);
       });
 
       renderTable(filtered);
@@ -135,4 +152,3 @@
 </body>
 
 </html>
- 
