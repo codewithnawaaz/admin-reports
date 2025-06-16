@@ -1,27 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Leave&Transfer Status Dashboard HC-03</title>
+  <title>Leave & Transfer Status Dashboard HC-03</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    .blink-badge {
+      animation: blinker 1s linear infinite;
+      background-color: #f87171;
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+    @keyframes blinker {
+      50% { opacity: 0; }
+    }
+    .green-tag {
+      background-color: #bbf7d0;
+      color: #065f46;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      display: inline-block;
+    }
+  </style>
 </head>
 
-<body class="bg-gradient-to-br from-gray-100 to-white min-h-screen font-sans relative">
-  <!-- Navbar -->
-  <!-- (Same navbar code as before) -->
+<body class="bg-gradient-to-br from-gray-100 to-white min-h-screen font-sans">
+  <!-- Navigation Bar -->
+  <nav class="bg-white shadow p-4">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <div class="text-lg font-bold text-blue-700">HC-03 Dashboard</div>
+      <div class="md:hidden">
+        <button id="menuBtn" class="text-gray-700 focus:outline-none">&#9776;</button>
+      </div>
+      <div id="menuLinks" class="hidden md:flex space-x-4 ml-auto">
+        <a href="index.html" class="text-gray-700 hover:text-blue-600 font-medium">Home</a>
+        <a href="reports.html" class="text-gray-700 hover:text-blue-600 font-medium">Reports</a>
+        <a href="manpower.html" class="text-gray-700 hover:text-blue-600 font-medium">ActiveManpower</a>
+        <a href="leave.html" class="text-gray-700 hover:text-blue-600 font-medium">Transfer/Leave</a>
+       
+      </div>
+    </div>
 
-  <div class="max-w-6xl mx-auto space-y-8 px-4 py-6">
+    <!-- Mobile Menu -->
+    <div id="mobileDropdown" class="md:hidden hidden flex-col space-y-2 px-4 pt-2">
+      <a href="index.html" class="text-gray-700 hover:text-blue-600">Home</a>
+      <a href="reports.html" class="text-gray-700 hover:text-blue-600">Reports</a>
+      <a href="manpower.html" class="text-gray-700 hover:text-blue-600">ActiveManpower</a>
+      <a href="leave.html" class="text-gray-700 hover:text-blue-600">Transfer/Leave</a>
+    
+    </div>
+  </nav>
+
+  <!-- Dashboard Content -->
+  <div class="max-w-6xl mx-auto px-4 py-6 space-y-6">
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 flex-wrap">
       <h1 class="text-2xl md:text-3xl font-extrabold text-gray-800">Leave Status Dashboard</h1>
-
       <div class="flex flex-wrap gap-2 items-center">
-        <input id="searchInput" type="number" placeholder="Search by ID"
-          class="w-36 px-2 py-1 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        <select id="statusFilter"
-          class="w-44 px-2 py-1 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <input id="searchInput" type="number" placeholder="Search by ID" class="w-36 px-2 py-1 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <select id="statusFilter" class="w-44 px-2 py-1 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
           <option value="">Filter by Status</option>
           <option value="Annual Leave">Annual Leave</option>
           <option value="Upcoming Leave">Upcoming Leave</option>
@@ -29,13 +72,10 @@
           <option value="Terminate">Terminate</option>
           <option value="Resigned">Resigned</option>
           <option value="Sanctioned Leave">Sanctioned Leave</option>
+          <option value="Rejoin Duty">Rejoin Duty</option>
         </select>
-        <input id="remarkSearch" type="text" placeholder="Search by Remark"
-          class="w-40 px-2 py-1 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        <button id="exportBtn"
-          class="px-3 py-1.5 text-sm bg-green-500 text-white rounded-md hover:bg-green-600 transition">
-          Export to Excel
-        </button>
+        <input id="remarkSearch" type="text" placeholder="Search by Remark" class="w-40 px-2 py-1 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <button id="exportBtn" class="px-3 py-1.5 text-sm bg-green-500 text-white rounded-md hover:bg-green-600 transition">Export to Excel</button>
       </div>
     </div>
 
@@ -43,19 +83,20 @@
       <table id="leaveTable" class="w-full text-sm text-left text-gray-800">
         <thead class="bg-blue-50 text-xs uppercase font-bold text-blue-700">
           <tr>
-            <th class="px-1 py-2 whitespace-nowrap hidden md:table-cell">Date</th>
-            <th class="px-1 py-2 whitespace-nowrap">Name</th>
-            <th class="px-1 py-2 whitespace-nowrap">ID</th>
-            <th class="px-1 py-2 whitespace-nowrap hidden md:table-cell">Position</th>
-            <th class="px-1 py-2 whitespace-nowrap hidden md:table-cell">Status</th>
-            <th class="px-1 py-2 whitespace-nowrap">Remark</th>
+            <th class="px-1 py-2 hidden md:table-cell">Date</th>
+            <th class="px-1 py-2">Name</th>
+            <th class="px-1 py-2">ID</th>
+            <th class="px-1 py-2 hidden md:table-cell">Position</th>
+            <th class="px-1 py-2 hidden md:table-cell">Status</th>
+            <th class="px-1 py-2">Remark</th>
           </tr>
         </thead>
-        <tbody id="leave-table" class="divide-y divide-gray-200 bg-white">
-          <!-- Dynamic Rows -->
-        </tbody>
+        <tbody id="leave-table" class="divide-y divide-gray-200 bg-white"></tbody>
       </table>
     </div>
+
+    <!-- Total Record Count (placed after table) -->
+    <div id="recordCount" class="text-sm text-right font-semibold text-gray-600 mt-2"></div>
   </div>
 
   <script>
@@ -68,87 +109,64 @@
       const searchInput = document.getElementById("searchInput");
       const statusFilter = document.getElementById("statusFilter");
       const remarkSearch = document.getElementById("remarkSearch");
+      const countDisplay = document.getElementById("recordCount");
 
       let originalData = [...data];
-      const countDisplay = document.createElement('div');
-      countDisplay.className = 'text-sm text-right font-semibold text-gray-600 mt-2';
-      document.querySelector('.max-w-6xl').appendChild(countDisplay);
 
       function renderTable(filteredData) {
         tableBody.innerHTML = "";
         countDisplay.textContent = `Total Records: ${filteredData.length}`;
-
         if (filteredData.length === 0) {
-          const noDataRow = document.createElement("tr");
-          noDataRow.innerHTML = `<td colspan="6" class="text-center py-4 text-gray-500 font-medium">No data found</td>`;
-          tableBody.appendChild(noDataRow);
+          const row = document.createElement("tr");
+          row.innerHTML = `<td colspan="6" class="text-center py-4 text-gray-500">No data found</td>`;
+          tableBody.appendChild(row);
           return;
         }
 
-        filteredData.forEach((entry) => {
+        filteredData.forEach(entry => {
           const row = document.createElement("tr");
-          let statusClass = "";
+          const today = new Date();
+          const leaveDate = entry["Leave Date"] ? new Date(entry["Leave Date"]) : null;
+
+          let statusClass = "hidden md:table-cell";
           let remarkClass = "";
           let statusContent = entry.Status;
-          const today = new Date();
-          const leaveDateField = entry["Leave Date"] ? new Date(entry["Leave Date"]) : null;
 
           const isUpcomingLeave = entry.Status.toLowerCase() === "upcoming leave";
           const isAnnualLeave = entry.Status.toLowerCase() === "annual leave";
 
-          const isWithin15Days = isUpcomingLeave && leaveDateField &&
-            (leaveDateField - today >= 0) && (leaveDateField - today <= 15 * 24 * 60 * 60 * 1000);
+          const isWithin15Days = isUpcomingLeave && leaveDate && (leaveDate - today <= 15 * 24 * 60 * 60 * 1000) && (leaveDate - today >= 0);
+          const isAnnualWithin5Days = isAnnualLeave && leaveDate && (leaveDate - today <= 5 * 24 * 60 * 60 * 1000) && (leaveDate - today >= 0);
 
-          const isAnnualWithin5Days = isAnnualLeave && leaveDateField &&
-            (leaveDateField - today >= 0) && (leaveDateField - today <= 5 * 24 * 60 * 60 * 1000);
-
-          if (isWithin15Days) {
-            statusClass = "text-red-600 font-extrabold flex items-center gap-1";
+          if (isWithin15Days || isAnnualWithin5Days) {
+            statusContent = `<span class="blink-badge">${entry.Status}</span>`;
             remarkClass = "text-red-600 font-semibold";
-            statusContent = `<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="w-4 h-4 inline-block" viewBox="0 0 20 20"><path d="M10.18 9H2a1 1 0 100 2h8.18l1.72 5.15a1 1 0 001.9-.63l-1.14-3.42H17a1 1 0 000-2h-4.34l1.14-3.42a1 1 0 00-1.9-.63L10.18 9z"/></svg> ${entry.Status}`;
-          } else if (isAnnualWithin5Days) {
-            statusClass = "text-teal-600 font-bold";
-            remarkClass = "text-red-600 font-semibold";
-          } else if (isUpcomingLeave) {
-            statusClass = "text-yellow-600 font-bold";
-          } else if (entry.Status.toLowerCase().includes("terminate")) {
-            statusClass = "text-red-600 font-bold";
-          } else if (entry.Status.toLowerCase().includes("transfer")) {
-            statusClass = "text-purple-600 font-bold";
-          } else if (entry.Status.toLowerCase().includes("resigned")) {
-            statusClass = "text-red-400 font-bold";
-          } else if (entry.Status.toLowerCase().includes("sanctioned")) {
-            statusClass = "text-green-500 font-bold";
-          } else if (entry.Status.toLowerCase().includes("annual")) {
-            statusClass = "text-teal-500 font-bold";
+          } else if (entry.Status.toLowerCase().includes("rejoin")) {
+            statusContent = `<span class="green-tag">${entry.Status}</span>`;
           }
 
-      row.innerHTML = `
-  <td class="px-2 py-2 whitespace-nowrap hidden md:table-cell">${new Date(entry.Date).toLocaleDateString()}</td>
-  <td class="px-2 py-2 whitespace-nowrap">${entry.Name}</td>
-  <td class="px-2 py-2 whitespace-nowrap">${entry.Id}</td>
-  <td class="px-2 py-2 whitespace-nowrap hidden md:table-cell">${entry.position}</td>
-  <td class="px-2 py-2 whitespace-nowrap hidden md:table-cell ${statusClass}">${statusContent}</td>
-  <td class="px-2 py-2 whitespace-nowrap ${remarkClass}">
-    ${(isWithin15Days || isAnnualWithin5Days) ? '✈️ ' : ''}${entry.Remark}
-  </td>
-`;
-
-
+          row.innerHTML = `
+            <td class="px-2 py-2 hidden md:table-cell">${new Date(entry.Date).toLocaleDateString()}</td>
+            <td class="px-2 py-2">${entry.Name}</td>
+            <td class="px-2 py-2">${entry.Id}</td>
+            <td class="px-2 py-2 hidden md:table-cell">${entry.position}</td>
+            <td class="px-2 py-2 ${statusClass}">${statusContent}</td>
+            <td class="px-2 py-2 ${remarkClass}">${(isWithin15Days || isAnnualWithin5Days) ? '✈️ ' : ''}${entry.Remark}</td>
+          `;
           tableBody.appendChild(row);
         });
       }
 
       function applyFilters() {
-        const idValue = searchInput.value.trim();
-        const statusValue = statusFilter.value.trim().toLowerCase();
-        const remarkValue = remarkSearch.value.trim().toLowerCase();
+        const idVal = searchInput.value.trim();
+        const statusVal = statusFilter.value.trim().toLowerCase();
+        const remarkVal = remarkSearch.value.trim().toLowerCase();
 
         const filtered = originalData.filter(entry => {
-          const matchesId = !idValue || entry.Id.toString().includes(idValue);
-          const matchesStatus = !statusValue || entry.Status.toLowerCase().includes(statusValue);
-          const matchesRemark = !remarkValue || entry.Remark.toLowerCase().includes(remarkValue);
-          return matchesId && matchesStatus && matchesRemark;
+          const matchId = !idVal || entry.Id.toString().includes(idVal);
+          const matchStatus = !statusVal || entry.Status.toLowerCase().includes(statusVal);
+          const matchRemark = !remarkVal || entry.Remark.toLowerCase().includes(remarkVal);
+          return matchId && matchStatus && matchRemark;
         });
 
         renderTable(filtered);
@@ -157,6 +175,7 @@
       searchInput.addEventListener("input", applyFilters);
       statusFilter.addEventListener("change", applyFilters);
       remarkSearch.addEventListener("input", applyFilters);
+
       renderTable(originalData);
     }
 
@@ -167,7 +186,11 @@
       const wb = XLSX.utils.table_to_book(table, { sheet: "Leave Status" });
       XLSX.writeFile(wb, "Leave_Status.xlsx");
     });
+
+    document.getElementById("menuBtn").addEventListener("click", () => {
+      const dropdown = document.getElementById("mobileDropdown");
+      dropdown.classList.toggle("hidden");
+    });
   </script>
 </body>
-
 </html>
