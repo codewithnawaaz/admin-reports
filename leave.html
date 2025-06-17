@@ -128,9 +128,11 @@
           const today = new Date();
           const leaveDate = entry["Leave Date"] ? new Date(entry["Leave Date"]) : null;
 
-          let statusClass = "hidden md:table-cell";
-          let remarkClass = "";
-          let statusContent = entry.Status;
+let statusClass = "hidden md:table-cell";
+let remarkClass = "";
+let statusText = entry.Status.trim().toLowerCase();
+let statusContent = `<span class="px-2 py-0.5 rounded-full text-xs font-bold inline-block"> ${entry.Status} </span>`;
+
 
           const isUpcomingLeave = entry.Status.toLowerCase() === "upcoming leave";
           const isAnnualLeave = entry.Status.toLowerCase() === "annual leave";
@@ -138,12 +140,37 @@
           const isWithin15Days = isUpcomingLeave && leaveDate && (leaveDate - today <= 15 * 24 * 60 * 60 * 1000) && (leaveDate - today >= 0);
           const isAnnualWithin5Days = isAnnualLeave && leaveDate && (leaveDate - today <= 5 * 24 * 60 * 60 * 1000) && (leaveDate - today >= 0);
 
-          if (isWithin15Days || isAnnualWithin5Days) {
-            statusContent = `<span class="blink-badge">${entry.Status}</span>`;
-            remarkClass = "text-red-600 font-semibold";
-          } else if (entry.Status.toLowerCase().includes("rejoin")) {
-            statusContent = `<span class="green-tag">${entry.Status}</span>`;
-          }
+       if (statusText === "upcoming leave") {
+  const leaveDate = entry["Leave Date"] ? new Date(entry["Leave Date"]) : null;
+  const today = new Date();
+  const isWithin15Days = leaveDate && (leaveDate - today <= 15 * 24 * 60 * 60 * 1000) && (leaveDate - today >= 0);
+  if (isWithin15Days) {
+    statusContent = `<span class="blink-badge">${entry.Status}</span>`;
+    remarkClass = "text-red-600 font-semibold";
+  } else {
+    statusContent = `<span class="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full text-xs font-bold">${entry.Status}</span>`;
+  }
+} else if (statusText === "annual leave") {
+  const leaveDate = entry["Leave Date"] ? new Date(entry["Leave Date"]) : null;
+  const today = new Date();
+  const isWithin5Days = leaveDate && (leaveDate - today <= 5 * 24 * 60 * 60 * 1000) && (leaveDate - today >= 0);
+  if (isWithin5Days) {
+    statusContent = `<span class="blink-badge">${entry.Status}</span>`;
+    remarkClass = "text-red-600 font-semibold";
+  } else {
+    statusContent = `<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-bold">${entry.Status}</span>`;
+  }
+} else if (statusText === "transfer out") {
+  statusContent = `<span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full text-xs font-bold">${entry.Status}</span>`;
+} else if (statusText === "terminate") {
+  statusContent = `<span class="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs font-bold">${entry.Status}</span>`;
+} else if (statusText === "resigned") {
+  statusContent = `<span class="bg-gray-200 text-gray-800 px-2 py-0.5 rounded-full text-xs font-bold">${entry.Status}</span>`;
+} else if (statusText === "sanctioned leave") {
+  statusContent = `<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-xs font-bold">${entry.Status}</span>`;
+} else if (statusText.includes("rejoin")) {
+  statusContent = `<span class="green-tag">${entry.Status}</span>`;
+}
 
           row.innerHTML = `
             <td class="px-2 py-2 hidden md:table-cell">${new Date(entry.Date).toLocaleDateString()}</td>
