@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Leave & Transfer Status Dashboard HC-03</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -44,22 +44,19 @@
         <a href="reports.html" class="text-gray-700 hover:text-blue-600 font-medium">Reports</a>
         <a href="manpower.html" class="text-gray-700 hover:text-blue-600 font-medium">ActiveManpower</a>
         <a href="leave.html" class="text-gray-700 hover:text-blue-600 font-medium">Transfer/Leave</a>
-       
       </div>
     </div>
-
-    <!-- Mobile Menu -->
     <div id="mobileDropdown" class="md:hidden hidden flex-col space-y-2 px-4 pt-2">
       <a href="index.html" class="text-gray-700 hover:text-blue-600">Home</a>
       <a href="reports.html" class="text-gray-700 hover:text-blue-600">Reports</a>
       <a href="manpower.html" class="text-gray-700 hover:text-blue-600">ActiveManpower</a>
       <a href="leave.html" class="text-gray-700 hover:text-blue-600">Transfer/Leave</a>
-    
     </div>
   </nav>
 
   <!-- Dashboard Content -->
-  <div class="max-w-6xl mx-auto px-4 py-6 space-y-6">
+<div class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 flex-wrap">
       <h1 class="text-2xl md:text-3xl font-extrabold text-gray-800">Leave Status Dashboard</h1>
       <div class="flex flex-wrap gap-2 items-center">
@@ -75,6 +72,9 @@
           <option value="Rejoin Duty">Rejoin Duty</option>
         </select>
         <input id="remarkSearch" type="text" placeholder="Search by Remark" class="w-40 px-2 py-1 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <select id="positionFilter" class="w-40 px-2 py-1 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="">Filter by Position</option>
+        </select>
         <button id="exportBtn" class="px-3 py-1.5 text-sm bg-green-500 text-white rounded-md hover:bg-green-600 transition">Export to Excel</button>
       </div>
     </div>
@@ -83,132 +83,169 @@
       <table id="leaveTable" class="w-full text-sm text-left text-gray-800">
         <thead class="bg-blue-50 text-xs uppercase font-bold text-blue-700">
           <tr>
-            <th class="px-1 py-2 hidden md:table-cell">Date</th>
+          
+
             <th class="px-1 py-2">Name</th>
             <th class="px-1 py-2">ID</th>
             <th class="px-1 py-2 hidden md:table-cell">Position</th>
             <th class="px-1 py-2 hidden md:table-cell">Status</th>
             <th class="px-1 py-2">Remark</th>
+            <th class="px-1 py-2 hidden md:table-cell">Departure</th>
+            <th class="px-1 py-2 hidden md:table-cell">Return</th>
+            <th class="px-1 py-2 hidden md:table-cell">Mobile</th>
           </tr>
         </thead>
         <tbody id="leave-table" class="divide-y divide-gray-200 bg-white"></tbody>
       </table>
     </div>
 
-    <!-- Total Record Count (placed after table) -->
-    <div id="recordCount" class="text-sm text-right font-semibold text-gray-600 mt-2"></div>
+    <!-- Pagination -->
+    <div class="flex justify-between items-center mt-4 text-sm text-gray-600">
+      <button id="prevPage" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">Previous</button>
+      <div id="recordCount" class="font-semibold"></div>
+      <button id="nextPage" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">Next</button>
+    </div>
   </div>
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwdVbbpVGj28LdvI1m9Vg7c_GtHBZ10ot62qyEHTtVq5OsC_ujFrTLjy6Dmtm4E3xE/exec?sheet=Sheet4";
 
+    let allData = [];
+    let currentPage = 1;
+    const rowsPerPage = 25;
+
     async function fetchLeaveData() {
       const res = await fetch(API_URL);
       const data = await res.json();
-      const tableBody = document.getElementById("leave-table");
-      const searchInput = document.getElementById("searchInput");
-      const statusFilter = document.getElementById("statusFilter");
-      const remarkSearch = document.getElementById("remarkSearch");
-      const countDisplay = document.getElementById("recordCount");
+      allData = data;
 
-      let originalData = [...data];
-
-      function renderTable(filteredData) {
-        tableBody.innerHTML = "";
-        countDisplay.textContent = `Total Records: ${filteredData.length}`;
-        if (filteredData.length === 0) {
-          const row = document.createElement("tr");
-          row.innerHTML = `<td colspan="6" class="text-center py-4 text-gray-500">No data found</td>`;
-          tableBody.appendChild(row);
-          return;
-        }
-
-        filteredData.forEach(entry => {
-          const row = document.createElement("tr");
-          const today = new Date();
-          const leaveDate = entry["Leave Date"] ? new Date(entry["Leave Date"]) : null;
-
-let statusClass = "hidden md:table-cell";
-let remarkClass = "";
-let statusText = entry.Status.trim().toLowerCase();
-let statusContent = `<span class="px-2 py-0.5 rounded-full text-xs font-bold inline-block"> ${entry.Status} </span>`;
-
-
-          const isUpcomingLeave = entry.Status.toLowerCase() === "upcoming leave";
-          const isAnnualLeave = entry.Status.toLowerCase() === "annual leave";
-
-          const isWithin15Days = isUpcomingLeave && leaveDate && (leaveDate - today <= 15 * 24 * 60 * 60 * 1000) && (leaveDate - today >= 0);
-          const isAnnualWithin5Days = isAnnualLeave && leaveDate && (leaveDate - today <= 5 * 24 * 60 * 60 * 1000) && (leaveDate - today >= 0);
-
-       if (statusText === "upcoming leave") {
-  const leaveDate = entry["Leave Date"] ? new Date(entry["Leave Date"]) : null;
-  const today = new Date();
-  const isWithin15Days = leaveDate && (leaveDate - today <= 15 * 24 * 60 * 60 * 1000) && (leaveDate - today >= 0);
-  if (isWithin15Days) {
-    statusContent = `<span class="blink-badge">${entry.Status}</span>`;
-    remarkClass = "text-red-600 font-semibold";
-  } else {
-    statusContent = `<span class="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full text-xs font-bold">${entry.Status}</span>`;
-  }
-} else if (statusText === "annual leave") {
-  const leaveDate = entry["Leave Date"] ? new Date(entry["Leave Date"]) : null;
-  const today = new Date();
-  const isWithin5Days = leaveDate && (leaveDate - today <= 5 * 24 * 60 * 60 * 1000) && (leaveDate - today >= 0);
-  if (isWithin5Days) {
-    statusContent = `<span class="blink-badge">${entry.Status}</span>`;
-    remarkClass = "text-red-600 font-semibold";
-  } else {
-    statusContent = `<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-bold">${entry.Status}</span>`;
-  }
-} else if (statusText === "transfer out") {
-  statusContent = `<span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full text-xs font-bold">${entry.Status}</span>`;
-} else if (statusText === "terminate") {
-  statusContent = `<span class="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs font-bold">${entry.Status}</span>`;
-} else if (statusText === "resigned") {
-  statusContent = `<span class="bg-gray-200 text-gray-800 px-2 py-0.5 rounded-full text-xs font-bold">${entry.Status}</span>`;
-} else if (statusText === "sanctioned leave") {
-  statusContent = `<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-xs font-bold">${entry.Status}</span>`;
-} else if (statusText.includes("rejoin")) {
-  statusContent = `<span class="green-tag">${entry.Status}</span>`;
-}
-
-          row.innerHTML = `
-            <td class="px-2 py-2 hidden md:table-cell">${new Date(entry.Date).toLocaleDateString()}</td>
-            <td class="px-2 py-2">${entry.Name}</td>
-            <td class="px-2 py-2">${entry.Id}</td>
-            <td class="px-2 py-2 hidden md:table-cell">${entry.position}</td>
-            <td class="px-2 py-2 ${statusClass}">${statusContent}</td>
-            <td class="px-2 py-2 ${remarkClass}">${(isWithin15Days || isAnnualWithin5Days) ? '✈️ ' : ''}${entry.Remark}</td>
-          `;
-          tableBody.appendChild(row);
-        });
-      }
-
-      function applyFilters() {
-        const idVal = searchInput.value.trim();
-        const statusVal = statusFilter.value.trim().toLowerCase();
-        const remarkVal = remarkSearch.value.trim().toLowerCase();
-
-        const filtered = originalData.filter(entry => {
-          const matchId = !idVal || entry.Id.toString().includes(idVal);
-          const matchStatus = !statusVal || entry.Status.toLowerCase().includes(statusVal);
-          const matchRemark = !remarkVal || entry.Remark.toLowerCase().includes(remarkVal);
-          return matchId && matchStatus && matchRemark;
-        });
-
-        renderTable(filtered);
-      }
-
-      searchInput.addEventListener("input", applyFilters);
-      statusFilter.addEventListener("change", applyFilters);
-      remarkSearch.addEventListener("input", applyFilters);
-
-      renderTable(originalData);
+      populatePositionFilter(data);
+      renderTable();
     }
 
-    fetchLeaveData();
+    function populatePositionFilter(data) {
+      const positionSet = new Set();
+      data.forEach(entry => {
+        if (entry.position) positionSet.add(entry.position);
+      });
 
-    document.getElementById('exportBtn').addEventListener('click', () => {
+      const positionFilter = document.getElementById("positionFilter");
+      positionSet.forEach(pos => {
+        const option = document.createElement("option");
+        option.value = pos;
+        option.textContent = pos;
+        positionFilter.appendChild(option);
+      });
+    }
+
+    function applyFilters() {
+      const idVal = document.getElementById("searchInput").value.trim();
+      const statusVal = document.getElementById("statusFilter").value.toLowerCase();
+      const remarkVal = document.getElementById("remarkSearch").value.toLowerCase();
+      const positionVal = document.getElementById("positionFilter").value.toLowerCase();
+
+      return allData.filter(entry => {
+        return (!idVal || entry.Id.toString().includes(idVal)) &&
+               (!statusVal || entry.Status.toLowerCase().includes(statusVal)) &&
+               (!remarkVal || entry.Remark.toLowerCase().includes(remarkVal)) &&
+               (!positionVal || entry.position.toLowerCase().includes(positionVal));
+      });
+    }
+
+    function renderTable() {
+      const filteredData = applyFilters();
+      const tableBody = document.getElementById("leave-table");
+      const countDisplay = document.getElementById("recordCount");
+
+      const startIndex = (currentPage - 1) * rowsPerPage;
+      const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
+
+      tableBody.innerHTML = "";
+      countDisplay.textContent = `Showing ${startIndex + 1}-${Math.min(startIndex + paginatedData.length, filteredData.length)} of ${filteredData.length} records`;
+
+      if (paginatedData.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-gray-500">No data found</td></tr>`;
+        return;
+      }
+
+      const today = new Date();
+      paginatedData.forEach(entry => {
+        const leaveDate = entry["Leave Date"] ? new Date(entry["Leave Date"]) : null;
+        const statusText = entry.Status.trim().toLowerCase();
+        let statusContent = `<span class="px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
+        let remarkClass = "";
+
+        if (statusText === "upcoming leave") {
+          const isWithin15 = leaveDate && (leaveDate - today <= 15 * 86400000) && (leaveDate - today >= 0);
+          statusContent = isWithin15 ?
+            `<span class="blink-badge">${entry.Status}</span>` :
+            `<span class="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full text-xs font-bold">${entry.Status}</span>`;
+          if (isWithin15) remarkClass = "text-red-600 font-semibold";
+        } else if (statusText === "annual leave") {
+          const isWithin5 = leaveDate && (leaveDate - today <= 5 * 86400000) && (leaveDate - today >= 0);
+          statusContent = isWithin5 ?
+            `<span class="blink-badge">${entry.Status}</span>` :
+            `<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-bold">${entry.Status}</span>`;
+          if (isWithin5) remarkClass = "text-red-600 font-semibold";
+        } else if (statusText === "transfer out") {
+          statusContent = `<span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full text-xs font-bold">${entry.Status}</span>`;
+        } else if (statusText === "terminate") {
+          statusContent = `<span class="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs font-bold">${entry.Status}</span>`;
+        } else if (statusText === "resigned") {
+          statusContent = `<span class="bg-gray-200 text-gray-800 px-2 py-0.5 rounded-full text-xs font-bold">${entry.Status}</span>`;
+        } else if (statusText === "sanctioned leave") {
+          statusContent = `<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-xs font-bold">${entry.Status}</span>`;
+        } else if (statusText.includes("rejoin")) {
+          statusContent = `<span class="green-tag">${entry.Status}</span>`;
+        }
+
+       <!-- Only this part is changed inside the renderTable() function -->
+const row = document.createElement("tr");
+
+// ✈️ emoji if within red-zone
+let flightIcon = "";
+if (
+  (statusText === "upcoming leave" && leaveDate && (leaveDate - today <= 15 * 86400000) && (leaveDate - today >= 0)) ||
+  (statusText === "annual leave" && leaveDate && (leaveDate - today <= 5 * 86400000) && (leaveDate - today >= 0))
+) {
+  flightIcon = `<span class="ml-1 text-blue-500">✈️</span>`;
+}
+
+row.innerHTML = `
+  <td class="px-2 py-2">${entry.Name}</td>
+  <td class="px-2 py-2">${entry.Id}</td>
+  <td class="px-2 py-2 hidden md:table-cell">${entry.position}</td>
+  <td class="px-2 py-2 hidden md:table-cell">${statusContent}</td>
+  <td class="px-2 py-2 ${remarkClass}">${flightIcon}${entry.Remark}</td>
+  <td class="px-2 py-2 hidden md:table-cell">${entry.Departure || "-"}</td>
+  <td class="px-2 py-2 hidden md:table-cell">${entry.Return || "-"}</td>
+  <td class="px-2 py-2 hidden md:table-cell">${entry.Mobile || "-"}</td>
+`;
+
+tableBody.appendChild(row);
+
+
+
+      });
+    }
+
+    document.getElementById("searchInput").addEventListener("input", () => { currentPage = 1; renderTable(); });
+    document.getElementById("statusFilter").addEventListener("change", () => { currentPage = 1; renderTable(); });
+    document.getElementById("remarkSearch").addEventListener("input", () => { currentPage = 1; renderTable(); });
+    document.getElementById("positionFilter").addEventListener("change", () => { currentPage = 1; renderTable(); });
+
+    document.getElementById("prevPage").addEventListener("click", () => {
+      if (currentPage > 1) currentPage--;
+      renderTable();
+    });
+
+    document.getElementById("nextPage").addEventListener("click", () => {
+      const filtered = applyFilters();
+      if (currentPage * rowsPerPage < filtered.length) currentPage++;
+      renderTable();
+    });
+
+    document.getElementById("exportBtn").addEventListener("click", () => {
       const table = document.getElementById("leaveTable");
       const wb = XLSX.utils.table_to_book(table, { sheet: "Leave Status" });
       XLSX.writeFile(wb, "Leave_Status.xlsx");
@@ -218,6 +255,8 @@ let statusContent = `<span class="px-2 py-0.5 rounded-full text-xs font-bold inl
       const dropdown = document.getElementById("mobileDropdown");
       dropdown.classList.toggle("hidden");
     });
+
+    fetchLeaveData();
   </script>
 </body>
 </html>
