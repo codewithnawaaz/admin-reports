@@ -55,8 +55,7 @@
   </nav>
 
   <!-- Dashboard Content -->
-<div class="max-w-7xl mx-auto px-4 py-6 space-y-6">
-
+  <div class="max-w-7xl mx-auto px-4 py-6 space-y-6">
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 flex-wrap">
       <h1 class="text-2xl md:text-3xl font-extrabold text-gray-800">Leave Status Dashboard</h1>
       <div class="flex flex-wrap gap-2 items-center">
@@ -83,8 +82,6 @@
       <table id="leaveTable" class="w-full text-sm text-left text-gray-800">
         <thead class="bg-blue-50 text-xs uppercase font-bold text-blue-700">
           <tr>
-          
-
             <th class="px-1 py-2">Name</th>
             <th class="px-1 py-2">ID</th>
             <th class="px-1 py-2 hidden md:table-cell">Position</th>
@@ -118,7 +115,6 @@
       const res = await fetch(API_URL);
       const data = await res.json();
       allData = data;
-
       populatePositionFilter(data);
       renderTable();
     }
@@ -128,7 +124,6 @@
       data.forEach(entry => {
         if (entry.position) positionSet.add(entry.position);
       });
-
       const positionFilter = document.getElementById("positionFilter");
       positionSet.forEach(pos => {
         const option = document.createElement("option");
@@ -143,7 +138,6 @@
       const statusVal = document.getElementById("statusFilter").value.toLowerCase();
       const remarkVal = document.getElementById("remarkSearch").value.toLowerCase();
       const positionVal = document.getElementById("positionFilter").value.toLowerCase();
-
       return allData.filter(entry => {
         return (!idVal || entry.Id.toString().includes(idVal)) &&
                (!statusVal || entry.Status.toLowerCase().includes(statusVal)) &&
@@ -156,10 +150,8 @@
       const filteredData = applyFilters();
       const tableBody = document.getElementById("leave-table");
       const countDisplay = document.getElementById("recordCount");
-
       const startIndex = (currentPage - 1) * rowsPerPage;
       const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
-
       tableBody.innerHTML = "";
       countDisplay.textContent = `Showing ${startIndex + 1}-${Math.min(startIndex + paginatedData.length, filteredData.length)} of ${filteredData.length} records`;
 
@@ -199,33 +191,26 @@
           statusContent = `<span class="green-tag">${entry.Status}</span>`;
         }
 
-       <!-- Only this part is changed inside the renderTable() function -->
-const row = document.createElement("tr");
+        let flightIcon = "";
+        if (
+          (statusText === "upcoming leave" && leaveDate && (leaveDate - today <= 15 * 86400000) && (leaveDate - today >= 0)) ||
+          (statusText === "annual leave" && leaveDate && (leaveDate - today <= 5 * 86400000) && (leaveDate - today >= 0))
+        ) {
+          flightIcon = `<span class="ml-1 text-blue-500">✈️</span>`;
+        }
 
-// ✈️ emoji if within red-zone
-let flightIcon = "";
-if (
-  (statusText === "upcoming leave" && leaveDate && (leaveDate - today <= 15 * 86400000) && (leaveDate - today >= 0)) ||
-  (statusText === "annual leave" && leaveDate && (leaveDate - today <= 5 * 86400000) && (leaveDate - today >= 0))
-) {
-  flightIcon = `<span class="ml-1 text-blue-500">✈️</span>`;
-}
-
-row.innerHTML = `
-  <td class="px-2 py-2">${entry.Name}</td>
-  <td class="px-2 py-2">${entry.Id}</td>
-  <td class="px-2 py-2 hidden md:table-cell">${entry.position}</td>
-  <td class="px-2 py-2 hidden md:table-cell">${statusContent}</td>
-  <td class="px-2 py-2 ${remarkClass}">${flightIcon}${entry.Remark}</td>
-  <td class="px-2 py-2 hidden md:table-cell">${entry.Departure || "-"}</td>
-  <td class="px-2 py-2 hidden md:table-cell">${entry.Return || "-"}</td>
-  <td class="px-2 py-2 hidden md:table-cell">${entry.Mobile || "-"}</td>
-`;
-
-tableBody.appendChild(row);
-
-
-
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td class="px-2 py-2">${entry.Name}</td>
+          <td class="px-2 py-2">${entry.Id}</td>
+          <td class="px-2 py-2 hidden md:table-cell">${entry.position}</td>
+          <td class="px-2 py-2 hidden md:table-cell">${statusContent}</td>
+          <td class="px-2 py-2 ${remarkClass}">${flightIcon}${entry.Remark}</td>
+          <td class="px-2 py-2 hidden md:table-cell">${entry.Departure || "-"}</td>
+          <td class="px-2 py-2 hidden md:table-cell">${entry.Return || "-"}</td>
+          <td class="px-2 py-2 hidden md:table-cell">${entry.Mobile || "-"}</td>
+        `;
+        tableBody.appendChild(row);
       });
     }
 
@@ -246,14 +231,26 @@ tableBody.appendChild(row);
     });
 
     document.getElementById("exportBtn").addEventListener("click", () => {
-      const table = document.getElementById("leaveTable");
-      const wb = XLSX.utils.table_to_book(table, { sheet: "Leave Status" });
+      const filteredData = applyFilters();
+      const wsData = [
+        ["Name", "ID", "Position", "Status", "Remark", "Departure", "Return", "Mobile"]
+      ];
+      filteredData.forEach(row => {
+        wsData.push([
+          row.Name,
+          row.Id,
+          row.position,
+          row.Status,
+          row.Remark,
+          row.Departure,
+          row.Return,
+          row.Mobile
+        ]);
+      });
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Leave Status");
       XLSX.writeFile(wb, "Leave_Status.xlsx");
-    });
-
-    document.getElementById("menuBtn").addEventListener("click", () => {
-      const dropdown = document.getElementById("mobileDropdown");
-      dropdown.classList.toggle("hidden");
     });
 
     fetchLeaveData();
