@@ -161,57 +161,85 @@
       }
 
       const today = new Date();
-      paginatedData.forEach(entry => {
-        const leaveDate = entry["Leave Date"] ? new Date(entry["Leave Date"]) : null;
-        const statusText = entry.Status.trim().toLowerCase();
-        let statusContent = `<span class="px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
-        let remarkClass = "";
+   paginatedData.forEach(entry => {
+  const leaveDate = entry["Leave Date"] ? new Date(entry["Leave Date"]) : null;
+  const statusText = entry.Status.trim().toLowerCase();
+  let statusContent = `<span class="px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
+  let remarkClass = "";
 
-        if (statusText === "upcoming leave") {
-          const isWithin15 = leaveDate && (leaveDate - today <= 15 * 86400000) && (leaveDate - today >= 0);
-          statusContent = isWithin15 ?
-            `<span class="blink-badge">${entry.Status}</span>` :
-            `<span class="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full text-xs font-bold">${entry.Status}</span>`;
-          if (isWithin15) remarkClass = "text-red-600 font-semibold";
-        } else if (statusText === "annual leave") {
-          const isWithin5 = leaveDate && (leaveDate - today <= 5 * 86400000) && (leaveDate - today >= 0);
-          statusContent = isWithin5 ?
-            `<span class="blink-badge">${entry.Status}</span>` :
-            `<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-bold">${entry.Status}</span>`;
-          if (isWithin5) remarkClass = "text-red-600 font-semibold";
-        } else if (statusText === "transfer out") {
-          statusContent = `<span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full text-xs font-bold">${entry.Status}</span>`;
-        } else if (statusText === "terminate") {
-          statusContent = `<span class="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs font-bold">${entry.Status}</span>`;
-        } else if (statusText === "resigned") {
-          statusContent = `<span class="bg-gray-200 text-gray-800 px-2 py-0.5 rounded-full text-xs font-bold">${entry.Status}</span>`;
-        } else if (statusText === "sanctioned leave") {
-          statusContent = `<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-xs font-bold">${entry.Status}</span>`;
-        } else if (statusText.includes("rejoin")) {
-          statusContent = `<span class="green-tag">${entry.Status}</span>`;
-        }
+  const diffInMs = leaveDate ? leaveDate - today : null;
+  const isPast = leaveDate && diffInMs < 0;
+  const isWithin15 = leaveDate && diffInMs <= 15 * 86400000 && diffInMs >= 0;
+  const isWithin5 = leaveDate && diffInMs <= 5 * 86400000 && diffInMs >= 0;
 
-        let flightIcon = "";
-        if (
-          (statusText === "upcoming leave" && leaveDate && (leaveDate - today <= 15 * 86400000) && (leaveDate - today >= 0)) ||
-          (statusText === "annual leave" && leaveDate && (leaveDate - today <= 5 * 86400000) && (leaveDate - today >= 0))
-        ) {
-          flightIcon = `<span class="ml-1 text-blue-500">✈️</span>`;
-        }
+  // blinking inline style for animation
+  const blinkStyle = "animation: blink 1s step-start infinite;";
+  const blinkKeyframes = `
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+  `;
 
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td class="px-2 py-2">${entry.Name}</td>
-          <td class="px-2 py-2">${entry.Id}</td>
-          <td class="px-2 py-2 hidden md:table-cell">${entry.position}</td>
-          <td class="px-2 py-2 hidden md:table-cell">${statusContent}</td>
-          <td class="px-2 py-2 ${remarkClass}">${flightIcon}${entry.Remark}</td>
-          <td class="px-2 py-2 hidden md:table-cell">${entry.Departure || "-"}</td>
-          <td class="px-2 py-2 hidden md:table-cell">${entry.Return || "-"}</td>
-          <td class="px-2 py-2 hidden md:table-cell">${entry.Mobile || "-"}</td>
-        `;
-        tableBody.appendChild(row);
-      });
+  // inject keyframes once if not done already
+  if (!document.getElementById("blink-keyframes")) {
+    const styleSheet = document.createElement("style");
+    styleSheet.type = "text/css";
+    styleSheet.id = "blink-keyframes";
+    styleSheet.innerText = blinkKeyframes;
+    document.head.appendChild(styleSheet);
+  }
+
+  if (statusText === "upcoming leave") {
+    if (isWithin15) {
+      statusContent = `<span class="bg-red-500 text-white px-2 py-0.5 rounded-full text-xs font-bold inline-block" style="${blinkStyle}">${entry.Status}</span>`;
+      remarkClass = "text-red-600 font-semibold";
+    } else if (isPast) {
+      statusContent = `<span class="bg-black text-white px-2 py-0.5 rounded-full text-xs font-bold inline-block" style="${blinkStyle}">${entry.Status}</span>`;
+    } else {
+      statusContent = `<span class="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
+    }
+  } else if (statusText === "annual leave") {
+    if (isWithin5) {
+      statusContent = `<span class="bg-red-500 text-white px-2 py-0.5 rounded-full text-xs font-bold inline-block" style="${blinkStyle}">${entry.Status}</span>`;
+      remarkClass = "text-red-600 font-semibold";
+    } else if (isPast) {
+      statusContent = `<span class="bg-black text-white px-2 py-0.5 rounded-full text-xs font-bold inline-block" style="${blinkStyle}">${entry.Status}</span>`;
+    } else {
+      statusContent = `<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
+    }
+  } else if (statusText === "transfer out") {
+    statusContent = `<span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
+  } else if (statusText === "terminate") {
+    statusContent = `<span class="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
+  } else if (statusText === "resigned") {
+    statusContent = `<span class="bg-gray-200 text-gray-800 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
+  } else if (statusText === "sanctioned leave") {
+    statusContent = `<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
+  } else if (statusText.includes("rejoin")) {
+    statusContent = `<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
+  }
+
+  let flightIcon = "";
+  if (
+    (statusText === "upcoming leave" && isWithin15) ||
+    (statusText === "annual leave" && isWithin5)
+  ) {
+    flightIcon = `<span class="ml-1 text-blue-500">✈️</span>`;
+  }
+
+  const row = document.createElement("tr");
+  row.innerHTML = `
+    <td class="px-2 py-2">${entry.Name}</td>
+    <td class="px-2 py-2">${entry.Id}</td>
+    <td class="px-2 py-2 hidden md:table-cell">${entry.position}</td>
+    <td class="px-2 py-2 hidden md:table-cell">${statusContent}</td>
+    <td class="px-2 py-2 ${remarkClass}">${flightIcon}${entry.Remark}</td>
+    <td class="px-2 py-2 hidden md:table-cell">${entry.Departure || "-"}</td>
+    <td class="px-2 py-2 hidden md:table-cell">${entry.Return || "-"}</td>
+    <td class="px-2 py-2 hidden md:table-cell">${entry.Mobile || "-"}</td>
+  `;
+  tableBody.appendChild(row);
+});
     }
 
     document.getElementById("searchInput").addEventListener("input", () => { currentPage = 1; renderTable(); });
