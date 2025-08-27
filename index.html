@@ -26,21 +26,20 @@
   <!-- Navigation Bar -->
   <nav class="bg-white shadow p-4">
     <div class="max-w-6xl mx-auto flex justify-between items-center">
-      <div class="text-lg font-bold text-blue-700">HC-03 Dashboard</div>
+      <div class="text-lg font-bold text-blue-700">Manpower_Dashboard</div>
       <div class="md:hidden">
         <button id="menuBtn" class="text-gray-700 focus:outline-none">&#9776;</button>
       </div>
       <div id="menuLinks" class="hidden md:flex space-x-4 ml-auto">
  
         <a href="manpower.html" class="text-gray-700 hover:text-blue-600 font-medium">ActiveManpower</a>
-        <a href="leave.html" class="text-gray-700 hover:text-blue-600 font-medium">Transfer/Leave</a>
+        <a href="index.html" class="text-gray-700 hover:text-blue-600 font-medium">Transfer/Leave</a>
       </div>
     </div>
     <div id="mobileDropdown" class="md:hidden hidden flex-col space-y-2 px-4 pt-2">
-      <a href="index.html" class="text-gray-700 hover:text-blue-600">Home</a>
-      <a href="reports.html" class="text-gray-700 hover:text-blue-600">Reports</a>
+   
       <a href="manpower.html" class="text-gray-700 hover:text-blue-600">ActiveManpower</a>
-      <a href="leave.html" class="text-gray-700 hover:text-blue-600">Transfer/Leave</a>
+      <a href="index.html" class="text-gray-700 hover:text-blue-600">Transfer/Leave</a>
     </div>
   </nav>
 
@@ -56,7 +55,7 @@
           <option value="Upcoming Leave">Upcoming Leave</option>
           <option value="Transfer Out">Transfer Out</option>
           <option value="Transfer In">Transfer In</option>
-          <option value="Terminate">Terminate</option>
+          <option value="End of contract">End of Contract</option>
           <option value="Resigned">Resigned</option>
           <option value="Sanctioned Leave">Sanctioned Leave</option>
           <option value="Rejoin Duty">Rejoin Duty</option>
@@ -221,7 +220,7 @@
       statusContent = `<span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
     } else if (statusText === "transfer in") {
       statusContent = `<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
-    } else if (statusText === "terminate") {
+    } else if (statusText === "end of contract") {
       statusContent = `<span class="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
     } else if (statusText === "resigned") {
       statusContent = `<span class="bg-gray-200 text-gray-800 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
