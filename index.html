@@ -161,14 +161,17 @@
 }
 
 
-    function renderTable() {
-      const filteredData = applyFilters();
+  function renderTable() {
+  const filteredData = applyFilters();
   const tableBody = document.getElementById("leave-table");
   const countDisplay = document.getElementById("recordCount");
   const startIndex = (currentPage - 1) * rowsPerPage;
   const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
   tableBody.innerHTML = "";
-  countDisplay.textContent = `Showing ${startIndex + 1}-${Math.min(startIndex + paginatedData.length, filteredData.length)} of ${filteredData.length} records`;
+  countDisplay.textContent = `Showing ${startIndex + 1}-${Math.min(
+    startIndex + paginatedData.length,
+    filteredData.length
+  )} of ${filteredData.length} records`;
 
   if (paginatedData.length === 0) {
     tableBody.innerHTML = `<tr><td colspan="10" class="text-center py-4 text-gray-500">No data found</td></tr>`;
@@ -221,17 +224,24 @@
     } else if (statusText === "transfer in") {
       statusContent = `<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
     } else if (statusText === "end of contract") {
-      statusContent = `<span class="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
+      if (isWithin15) {
+        // ⚫ Black Blink agar pass ho gaya
+        // 🔴 Red Blink jab tak pass nahi hua
+        statusContent = `<span class="bg-red-500 text-white px-2 py-0.5 rounded-full text-xs font-bold inline-block" style="${blinkStyle}">${entry.Status}</span>`;
+        remarkClass = "text-red-600 font-semibold";
+        
+      } else if(isPast) {
+        statusContent = `<span class="bg-black text-white px-2 py-0.5 rounded-full text-xs font-bold inline-block" style="${blinkStyle}">${entry.Status}</span>`;
+      }
     } else if (statusText === "resigned") {
       statusContent = `<span class="bg-gray-200 text-gray-800 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
     } else if (statusText === "sanctioned leave") {
       statusContent = `<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
     } else if (statusText.includes("rejoin")) {
       statusContent = `<span class="bg-green-200 text-green-800 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
-    }else if (statusText.includes("inactive")) {
-  statusContent = `<span class="bg-gray-200 text-green-800 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
-}
-
+    } else if (statusText.includes("inactive")) {
+      statusContent = `<span class="bg-gray-200 text-green-800 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
+    }
 
     let flightIcon = "";
     if (
@@ -258,9 +268,10 @@
       <td class="px-2 py-2 hidden md:table-cell">${entry.Return || "-"}</td>
       <td class="px-2 py-2 hidden md:table-cell">${entry.Mobile || "-"}</td>
     `;
-        tableBody.appendChild(row);
-      });
-    }
+    tableBody.appendChild(row);
+  });
+}
+
 
     // Event Listeners
     document.getElementById("searchInput").addEventListener("input", () => { currentPage = 1; renderTable(); });
