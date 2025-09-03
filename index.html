@@ -31,13 +31,11 @@
         <button id="menuBtn" class="text-gray-700 focus:outline-none">&#9776;</button>
       </div>
       <div id="menuLinks" class="hidden md:flex space-x-4 ml-auto">
- 
         <a href="manpower.html" class="text-gray-700 hover:text-blue-600 font-medium">ActiveManpower</a>
         <a href="index.html" class="text-gray-700 hover:text-blue-600 font-medium">Transfer/Leave</a>
       </div>
     </div>
     <div id="mobileDropdown" class="md:hidden hidden flex-col space-y-2 px-4 pt-2">
-   
       <a href="manpower.html" class="text-gray-700 hover:text-blue-600">ActiveManpower</a>
       <a href="index.html" class="text-gray-700 hover:text-blue-600">Transfer/Leave</a>
     </div>
@@ -45,6 +43,13 @@
 
   <!-- Dashboard Content -->
   <div class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+    <!-- ✅ Global Search Bar -->
+    <div class="flex justify-end mb-4">
+      <input id="globalSearch" type="text" 
+        placeholder="🔍 Global Search (Name, ID, Remark, Position, Status)" 
+        class="w-64 px-2 py-1 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+    </div>
+
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 flex-wrap">
       <h1 class="text-2xl md:text-3xl font-extrabold text-gray-800">Leave Status Dashboard</h1>
       <div class="flex flex-wrap gap-2 items-center">
@@ -130,156 +135,152 @@
       });
     }
 
- function applyFilters() {
-  const idVal = document.getElementById("searchInput").value.trim();
-  const statusVal = document.getElementById("statusFilter").value.toLowerCase();
-  const remarkVal = document.getElementById("remarkSearch").value.toLowerCase();
-  const positionVal = document.getElementById("positionFilter").value.toLowerCase();
+    function applyFilters() {
+      const idVal = document.getElementById("searchInput").value.trim();
+      const statusVal = document.getElementById("statusFilter").value.toLowerCase();
+      const remarkVal = document.getElementById("remarkSearch").value.toLowerCase();
+      const positionVal = document.getElementById("positionFilter").value.toLowerCase();
+      const globalVal = document.getElementById("globalSearch").value.toLowerCase();
 
-  // From Date -> Start of the Day (00:00:00)
-  const fromDateInput = document.getElementById("fromDate").value;
-  const fromDateVal = fromDateInput ? new Date(fromDateInput + "T00:00:00") : null;
+      const fromDateInput = document.getElementById("fromDate").value;
+      const fromDateVal = fromDateInput ? new Date(fromDateInput + "T00:00:00") : null;
+      const toDateInput = document.getElementById("toDate").value;
+      const toDateVal = toDateInput ? new Date(toDateInput + "T23:59:59") : null;
 
-  // To Date -> End of the Day (23:59:59)
-  const toDateInput = document.getElementById("toDate").value;
-  const toDateVal = toDateInput ? new Date(toDateInput + "T23:59:59") : null;
+      return allData.filter(entry => {
+        const autoDate = entry["Date"] ? new Date(entry["Date"]) : null;
 
-  return allData.filter(entry => {
-    const autoDate = entry["Date"] ? new Date(entry["Date"]) : null;  // ✅ Auto-generated Date field
+        let dateMatch = true;
+        if (fromDateVal && (!autoDate || autoDate < fromDateVal)) dateMatch = false;
+        if (toDateVal && (!autoDate || autoDate > toDateVal)) dateMatch = false;
 
-    // Date Range Check
-    let dateMatch = true;
-    if (fromDateVal && (!autoDate || autoDate < fromDateVal)) dateMatch = false;
-    if (toDateVal && (!autoDate || autoDate > toDateVal)) dateMatch = false;
-
-    return (!idVal || entry.Id.toString().includes(idVal)) &&
-           (!statusVal || entry.Status.toLowerCase().includes(statusVal)) &&
-           (!remarkVal || entry.Remark.toLowerCase().includes(remarkVal)) &&
-           (!positionVal || entry.position.toLowerCase().includes(positionVal)) &&
-           dateMatch;
-  });
-}
-
-
-  function renderTable() {
-  const filteredData = applyFilters();
-  const tableBody = document.getElementById("leave-table");
-  const countDisplay = document.getElementById("recordCount");
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
-  tableBody.innerHTML = "";
-  countDisplay.textContent = `Showing ${startIndex + 1}-${Math.min(
-    startIndex + paginatedData.length,
-    filteredData.length
-  )} of ${filteredData.length} records`;
-
-  if (paginatedData.length === 0) {
-    tableBody.innerHTML = `<tr><td colspan="10" class="text-center py-4 text-gray-500">No data found</td></tr>`;
-    return;
-  }
-
-  const today = new Date();
-  paginatedData.forEach(entry => {
-    const leaveDate = entry["Leave Date"] ? new Date(entry["Leave Date"]) : null;
-    const statusText = entry.Status.trim().toLowerCase();
-    let statusContent = `<span class="px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
-    let remarkClass = "";
-
-    const diffInMs = leaveDate ? leaveDate - today : null;
-    const isPast = leaveDate && diffInMs < 0;
-    const isWithin15 = leaveDate && diffInMs <= 15 * 86400000 && diffInMs >= 0;
-    const isWithin5 = leaveDate && diffInMs <= 5 * 86400000 && diffInMs >= 0;
-
-    // blink style
-    const blinkStyle = "animation: blink 1s step-start infinite;";
-    const blinkKeyframes = `@keyframes blink { 50% { opacity: 0; } }`;
-    if (!document.getElementById("blink-keyframes")) {
-      const styleSheet = document.createElement("style");
-      styleSheet.type = "text/css";
-      styleSheet.id = "blink-keyframes";
-      styleSheet.innerText = blinkKeyframes;
-      document.head.appendChild(styleSheet);
+        return (!idVal || entry.Id.toString().includes(idVal)) &&
+               (!statusVal || entry.Status.toLowerCase().includes(statusVal)) &&
+               (!remarkVal || entry.Remark.toLowerCase().includes(remarkVal)) &&
+               (!positionVal || entry.position.toLowerCase().includes(positionVal)) &&
+               (!globalVal || 
+                  entry.Name.toLowerCase().includes(globalVal) ||
+                  entry.Id.toString().includes(globalVal) ||
+                  entry.Remark.toLowerCase().includes(globalVal) ||
+                  entry.position.toLowerCase().includes(globalVal) ||
+                  entry.Status.toLowerCase().includes(globalVal)
+               ) &&
+               dateMatch;
+      });
     }
 
-    if (statusText === "upcoming leave") {
-      if (isWithin15) {
-        statusContent = `<span class="bg-red-500 text-white px-2 py-0.5 rounded-full text-xs font-bold inline-block" style="${blinkStyle}">${entry.Status}</span>`;
-        remarkClass = "text-red-600 font-semibold";
-      } else if (isPast) {
-        statusContent = `<span class="bg-black text-white px-2 py-0.5 rounded-full text-xs font-bold inline-block" style="${blinkStyle}">${entry.Status}</span>`;
-      } else {
-        statusContent = `<span class="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
+    function renderTable() {
+      const filteredData = applyFilters();
+      const tableBody = document.getElementById("leave-table");
+      const countDisplay = document.getElementById("recordCount");
+      const startIndex = (currentPage - 1) * rowsPerPage;
+      const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
+      tableBody.innerHTML = "";
+      countDisplay.textContent = `Showing ${startIndex + 1}-${Math.min(
+        startIndex + paginatedData.length,
+        filteredData.length
+      )} of ${filteredData.length} records`;
+
+      if (paginatedData.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="10" class="text-center py-4 text-gray-500">No data found</td></tr>`;
+        return;
       }
-    } else if (statusText === "annual leave") {
-      if (isWithin15) {
-        statusContent = `<span class="bg-red-500 text-white px-2 py-0.5 rounded-full text-xs font-bold inline-block" style="${blinkStyle}">${entry.Status}</span>`;
-        remarkClass = "text-red-600 font-semibold";
-      } else if (isPast) {
-        statusContent = `<span class="bg-black text-white px-2 py-0.5 rounded-full text-xs font-bold inline-block" style="${blinkStyle}">${entry.Status}</span>`;
-      } else {
-        statusContent = `<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
-      }
-    } else if (statusText === "transfer out") {
-      statusContent = `<span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
-    } else if (statusText === "transfer in") {
-      statusContent = `<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
-    } else if (statusText === "end of contract") {
-      if (isWithin15) {
-        // ⚫ Black Blink agar pass ho gaya
-        // 🔴 Red Blink jab tak pass nahi hua
-        statusContent = `<span class="bg-red-500 text-white px-2 py-0.5 rounded-full text-xs font-bold inline-block" style="${blinkStyle}">${entry.Status}</span>`;
-        remarkClass = "text-red-600 font-semibold";
-        
-      } else if(isPast) {
-        statusContent = `<span class="bg-black text-white px-2 py-0.5 rounded-full text-xs font-bold inline-block" style="${blinkStyle}">${entry.Status}</span>`;
-      }
-    } else if (statusText === "resigned") {
-      statusContent = `<span class="bg-gray-200 text-gray-800 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
-    } else if (statusText === "sanctioned leave") {
-      statusContent = `<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
-    } else if (statusText.includes("rejoin")) {
-      statusContent = `<span class="bg-green-200 text-green-800 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
-    } else if (statusText.includes("inactive")) {
-      statusContent = `<span class="bg-gray-200 text-green-800 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
+
+      const today = new Date();
+      paginatedData.forEach(entry => {
+        const leaveDate = entry["Leave Date"] ? new Date(entry["Leave Date"]) : null;
+        const statusText = entry.Status.trim().toLowerCase();
+        let statusContent = `<span class="px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
+        let remarkClass = "";
+
+        const diffInMs = leaveDate ? leaveDate - today : null;
+        const isPast = leaveDate && diffInMs < 0;
+        const isWithin15 = leaveDate && diffInMs <= 15 * 86400000 && diffInMs >= 0;
+        const isWithin5 = leaveDate && diffInMs <= 5 * 86400000 && diffInMs >= 0;
+
+        const blinkStyle = "animation: blink 1s step-start infinite;";
+        const blinkKeyframes = `@keyframes blink { 50% { opacity: 0; } }`;
+        if (!document.getElementById("blink-keyframes")) {
+          const styleSheet = document.createElement("style");
+          styleSheet.type = "text/css";
+          styleSheet.id = "blink-keyframes";
+          styleSheet.innerText = blinkKeyframes;
+          document.head.appendChild(styleSheet);
+        }
+
+        if (statusText === "upcoming leave") {
+          if (isWithin15) {
+            statusContent = `<span class="bg-red-500 text-white px-2 py-0.5 rounded-full text-xs font-bold inline-block" style="${blinkStyle}">${entry.Status}</span>`;
+            remarkClass = "text-red-600 font-semibold";
+          } else if (isPast) {
+            statusContent = `<span class="bg-black text-white px-2 py-0.5 rounded-full text-xs font-bold inline-block" style="${blinkStyle}">${entry.Status}</span>`;
+          } else {
+            statusContent = `<span class="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
+          }
+        } else if (statusText === "annual leave") {
+          if (isWithin15) {
+            statusContent = `<span class="bg-red-500 text-white px-2 py-0.5 rounded-full text-xs font-bold inline-block" style="${blinkStyle}">${entry.Status}</span>`;
+            remarkClass = "text-red-600 font-semibold";
+          } else if (isPast) {
+            statusContent = `<span class="bg-black text-white px-2 py-0.5 rounded-full text-xs font-bold inline-block" style="${blinkStyle}">${entry.Status}</span>`;
+          } else {
+            statusContent = `<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
+          }
+        } else if (statusText === "transfer out") {
+          statusContent = `<span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
+        } else if (statusText === "transfer in") {
+          statusContent = `<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
+        } else if (statusText === "end of contract") {
+          if (isWithin15) {
+            statusContent = `<span class="bg-red-500 text-white px-2 py-0.5 rounded-full text-xs font-bold inline-block" style="${blinkStyle}">${entry.Status}</span>`;
+            remarkClass = "text-red-600 font-semibold";
+          } else if(isPast) {
+            statusContent = `<span class="bg-black text-white px-2 py-0.5 rounded-full text-xs font-bold inline-block" style="${blinkStyle}">${entry.Status}</span>`;
+          }
+        } else if (statusText === "resigned") {
+          statusContent = `<span class="bg-gray-200 text-gray-800 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
+        } else if (statusText === "sanctioned leave") {
+          statusContent = `<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
+        } else if (statusText.includes("rejoin")) {
+          statusContent = `<span class="bg-green-200 text-green-800 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
+        } else if (statusText.includes("inactive")) {
+          statusContent = `<span class="bg-gray-200 text-green-800 px-2 py-0.5 rounded-full text-xs font-bold inline-block">${entry.Status}</span>`;
+        }
+
+        let flightIcon = "";
+        if (
+          (statusText === "upcoming leave" && isWithin15) ||
+          (statusText === "annual leave" && isWithin5)
+        ) {
+          flightIcon = `<span class="ml-1 text-blue-500">✈️</span>`;
+        }
+
+        const recordDate = entry.Date
+          ? new Date(entry.Date).toLocaleDateString("en-GB")
+          : "-";
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td class="px-2 py-2">${recordDate}</td>
+          <td class="px-2 py-2">${entry.Name}</td>
+          <td class="px-2 py-2">${entry.Id}</td>
+          <td class="px-2 py-2 hidden md:table-cell">${entry.position}</td>
+          <td class="px-2 py-2 hidden md:table-cell">${statusContent}</td>
+          <td class="px-2 py-2 ${remarkClass}">${flightIcon}${entry.Remark}</td>
+          <td class="px-2 py-2 hidden md:table-cell">${entry.Departure || "-"}</td>
+          <td class="px-2 py-2 hidden md:table-cell">${entry.Return || "-"}</td>
+          <td class="px-2 py-2 hidden md:table-cell">${entry.Mobile || "-"}</td>
+        `;
+        tableBody.appendChild(row);
+      });
     }
-
-    let flightIcon = "";
-    if (
-      (statusText === "upcoming leave" && isWithin15) ||
-      (statusText === "annual leave" && isWithin5)
-    ) {
-      flightIcon = `<span class="ml-1 text-blue-500">✈️</span>`;
-    }
-
-    // Format Date from entry.Date
-    const recordDate = entry.Date
-      ? new Date(entry.Date).toLocaleDateString("en-GB") // DD/MM/YYYY
-      : "-";
-
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td class="px-2 py-2">${recordDate}</td>
-      <td class="px-2 py-2">${entry.Name}</td>
-      <td class="px-2 py-2">${entry.Id}</td>
-      <td class="px-2 py-2 hidden md:table-cell">${entry.position}</td>
-      <td class="px-2 py-2 hidden md:table-cell">${statusContent}</td>
-      <td class="px-2 py-2 ${remarkClass}">${flightIcon}${entry.Remark}</td>
-      <td class="px-2 py-2 hidden md:table-cell">${entry.Departure || "-"}</td>
-      <td class="px-2 py-2 hidden md:table-cell">${entry.Return || "-"}</td>
-      <td class="px-2 py-2 hidden md:table-cell">${entry.Mobile || "-"}</td>
-    `;
-    tableBody.appendChild(row);
-  });
-}
-
 
     // Event Listeners
-    document.getElementById("searchInput").addEventListener("input", () => { currentPage = 1; renderTable(); });
-    document.getElementById("statusFilter").addEventListener("change", () => { currentPage = 1; renderTable(); });
-    document.getElementById("remarkSearch").addEventListener("input", () => { currentPage = 1; renderTable(); });
-    document.getElementById("positionFilter").addEventListener("change", () => { currentPage = 1; renderTable(); });
-    document.getElementById("fromDate").addEventListener("change", () => { currentPage = 1; renderTable(); });
-    document.getElementById("toDate").addEventListener("change", () => { currentPage = 1; renderTable(); });
+    ["searchInput","statusFilter","remarkSearch","positionFilter","fromDate","toDate","globalSearch"].forEach(id => {
+      const el = document.getElementById(id);
+      const eventType = (el.tagName === "SELECT" || el.type==="date") ? "change" : "input";
+      el.addEventListener(eventType, () => { currentPage = 1; renderTable(); });
+    });
 
     document.getElementById("prevPage").addEventListener("click", () => {
       if (currentPage > 1) currentPage--;
