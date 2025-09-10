@@ -44,14 +44,15 @@
   <!-- Dashboard Content -->
   <div class="max-w-7xl mx-auto px-4 py-6 space-y-6">
     <!-- ✅ Global Search Bar -->
-    <div class="flex justify-end mb-4">
+    <div class="flex justify-between mb-4">
       <input id="globalSearch" type="text" 
-        placeholder="🔍 Global Search (Name, ID, Remark, Position, Status)" 
-        class="w-64 px-2 py-1 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+        placeholder="🔍Name, ID, Remark, Position, Status" 
+        class="w-80 px-2 py-1 border  border-blue-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:font-bold"/>
     </div>
 
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 flex-wrap">
       <h1 class="text-2xl md:text-3xl font-extrabold text-gray-800">Leave Status Dashboard</h1>
+      
       <div class="flex flex-wrap gap-2 items-center">
         <input id="searchInput" type="number" placeholder="Search by ID" class="w-36 px-2 py-1 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
         <select id="statusFilter" class="w-44 px-2 py-1 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -74,7 +75,7 @@
         <!-- ✅ Date Range Filters -->
         <input id="fromDate" type="date" class="px-2 py-1 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
         <input id="toDate" type="date" class="px-2 py-1 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
-
+        <button id="clearFilters" class="px-3 py-1.5 text-sm bg-red-500 text-white rounded-md hover:bg-red-600 transition">Clear Filters</button>
         <button id="exportBtn" class="px-3 py-1.5 text-sm bg-green-500 text-white rounded-md hover:bg-green-600 transition">Export to Excel</button>
       </div>
     </div>
@@ -92,6 +93,7 @@
             <th class="px-1 py-2 hidden md:table-cell">Departure</th>
             <th class="px-1 py-2 hidden md:table-cell">Return</th>
             <th class="px-1 py-2 hidden md:table-cell">Mobile</th>
+            <th class="px-1 py-2 text-center">✔</th>
           </tr>
         </thead>
         <tbody id="leave-table" class="divide-y divide-gray-200 bg-white"></tbody>
@@ -182,7 +184,7 @@
       )} of ${filteredData.length} records`;
 
       if (paginatedData.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="10" class="text-center py-4 text-gray-500">No data found</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="11" class="text-center py-4 text-gray-500">No data found</td></tr>`;
         return;
       }
 
@@ -270,7 +272,18 @@
           <td class="px-2 py-2 hidden md:table-cell">${entry.Departure || "-"}</td>
           <td class="px-2 py-2 hidden md:table-cell">${entry.Return || "-"}</td>
           <td class="px-2 py-2 hidden md:table-cell">${entry.Mobile || "-"}</td>
+          <td class="px-2 py-2 text-center">
+            <button class="markDone text-lg">•</button>
+          </td>
         `;
+
+        // ✅ Strike-through toggle
+        const markBtn = row.querySelector(".markDone");
+        markBtn.addEventListener("click", () => {
+          row.classList.toggle("line-through");
+          row.classList.toggle("text-gray-400");
+        });
+
         tableBody.appendChild(row);
       });
     }
@@ -288,33 +301,30 @@
     });
 
     document.getElementById("nextPage").addEventListener("click", () => {
-      const filtered = applyFilters();
-      if (currentPage * rowsPerPage < filtered.length) currentPage++;
+      const filteredLength = applyFilters().length;
+      if (currentPage * rowsPerPage < filteredLength) currentPage++;
       renderTable();
     });
 
+    document.getElementById("clearFilters").addEventListener("click", () => {
+      ["searchInput","statusFilter","remarkSearch","positionFilter","fromDate","toDate","globalSearch"].forEach(id => document.getElementById(id).value = "");
+      currentPage = 1;
+      renderTable();
+    });
+
+    // Export to Excel
     document.getElementById("exportBtn").addEventListener("click", () => {
       const filteredData = applyFilters();
-      const wsData = [
-        ["Date","Name", "ID", "Position", "Status", "Remark", "Departure", "Return", "Mobile"]
-      ];
-      filteredData.forEach(row => {
-        wsData.push([
-          row.Date,
-          row.Name,
-          row.Id,
-          row.position,
-          row.Status,
-          row.Remark,
-          row.Departure,
-          row.Return,
-          row.Mobile
-        ]);
-      });
-      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      const ws = XLSX.utils.json_to_sheet(filteredData);
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Leave Status");
-      XLSX.writeFile(wb, "Leave_Status.xlsx");
+      XLSX.utils.book_append_sheet(wb, ws, "Leave Data");
+      XLSX.writeFile(wb, "LeaveData.xlsx");
+    });
+
+    // Mobile menu
+    document.getElementById("menuBtn").addEventListener("click", () => {
+      const menu = document.getElementById("mobileDropdown");
+      menu.classList.toggle("hidden");
     });
 
     fetchLeaveData();
