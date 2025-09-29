@@ -23,40 +23,41 @@
 </head>
 
 <body class="bg-gradient-to-br from-gray-100 to-white min-h-screen font-sans">
-  <!-- Navigation Bar -->
-  <nav class="bg-white shadow p-4">
-    <div class="max-w-6xl mx-auto flex justify-between items-center">
-      <div class="text-lg font-bold text-blue-700">Manpower_Dashboard</div>
-      <div class="md:hidden">
-        <button id="menuBtn" class="text-gray-700 focus:outline-none">&#9776;</button>
-      </div>
-      <div id="menuLinks" class="hidden md:flex space-x-4 ml-auto">
-        <a href="manpower.html" class="text-gray-700 hover:text-blue-600 font-medium">ActiveManpower</a>
-        <a href="index.html" class="text-gray-700 hover:text-blue-600 font-medium">Transfer/Leave</a>
-      </div>
-    </div>
-    <div id="mobileDropdown" class="md:hidden hidden flex-col space-y-2 px-4 pt-2">
-      <a href="manpower.html" class="text-gray-700 hover:text-blue-600">ActiveManpower</a>
-      <a href="index.html" class="text-gray-700 hover:text-blue-600">Transfer/Leave</a>
-    </div>
-  </nav>
+  <div class="flex flex-col h-screen max-w-7xl mx-auto w-full">
 
-  <!-- Dashboard Content -->
-  <div class="max-w-7xl mx-auto px-4 py-6 space-y-6">
-    <!-- ✅ Global Search Bar -->
-    <div class="flex justify-between mb-4">
-      <input id="globalSearch" type="text" 
-        placeholder="🔍Name, ID, Remark, Position, Status" 
-        class="w-80 px-2 py-1 border  border-blue-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:font-bold"/>
-    </div>
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow p-4 sticky top-0 z-50">
+      <div class="mx-auto flex justify-between items-center">
+        <div class="text-lg font-bold text-blue-700">Manpower_Dashboard</div>
+        <div class="md:hidden">
+          <button id="menuBtn" class="text-gray-700 focus:outline-none">&#9776;</button>
+        </div>
+        <div id="menuLinks" class="hidden md:flex space-x-4 ml-auto">
+          <a href="manpower.html" class="text-gray-700 hover:text-blue-600 font-medium">ActiveManpower</a>
+          <a href="index.html" class="text-gray-700 hover:text-blue-600 font-medium">Transfer/Leave</a>
+        </div>
+      </div>
+      <div id="mobileDropdown" class="md:hidden hidden flex-col space-y-2 px-4 pt-2">
+        <a href="manpower.html" class="text-gray-700 hover:text-blue-600">ActiveManpower</a>
+        <a href="index.html" class="text-gray-700 hover:text-blue-600">Transfer/Leave</a>
+      </div>
+    </nav>
 
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 flex-wrap">
-      <h1 class="text-2xl md:text-3xl font-extrabold text-gray-800">Leave Status Dashboard</h1>
-      
-      <div class="flex flex-wrap gap-2 items-center">
-        <input id="searchInput" type="number" placeholder="Search by ID" class="w-36 px-2 py-1 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        <select id="statusFilter" class="w-44 px-2 py-1 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <option value="">Filter by Status</option>
+    <!-- Filters + Global Search -->
+    <div class="px-3 py-2 bg-gradient-to-br from-gray-100 to-white 
+                sticky top-[56px] z-40 border-b border-gray-200">
+
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 flex-wrap text-xs">
+
+        <!-- Global Search -->
+        <input id="globalSearch" type="text"
+          placeholder="🔍 Name, ID, Remark, Position, Status"
+          class="w-56 px-2 py-1 border border-blue-600 rounded-md text-xs 
+                 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:font-bold"/>
+
+        <select id="statusFilter"
+          class="w-36 px-2 py-1 border rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
+          <option value="">Status</option>
           <option value="Annual Leave">Annual Leave</option>
           <option value="Upcoming Leave">Upcoming Leave</option>
           <option value="Transfer Out">Transfer Out</option>
@@ -67,26 +68,35 @@
           <option value="Rejoin Duty">Rejoin Duty</option>
           <option value="Inactive">Inactive</option>
         </select>
-        <input id="remarkSearch" type="text" placeholder="Search by Remark" class="w-40 px-2 py-1 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        <select id="positionFilter" class="w-40 px-2 py-1 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <option value="">Filter by Position</option>
+
+        <select id="positionFilter"
+          class="w-32 px-2 py-1 border rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
+          <option value="">Position</option>
         </select>
 
-        <!-- ✅ Date Range Filters -->
-        <input id="fromDate" type="date" class="px-2 py-1 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
-        <input id="toDate" type="date" class="px-2 py-1 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
-        <button id="clearFilters" class="px-3 py-1.5 text-sm bg-red-500 text-white rounded-md hover:bg-red-600 transition">Clear Filters</button>
-        <button id="exportBtn" class="px-3 py-1.5 text-sm bg-green-500 text-white rounded-md hover:bg-green-600 transition">Export to Excel</button>
+        <!-- Date Range -->
+        <input id="fromDate" type="date"
+          class="px-2 py-1 border rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-blue-500" />
+        <input id="toDate" type="date"
+          class="px-2 py-1 border rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-blue-500" />
+
+        <button id="alertBtn"
+          class="px-2 py-1 text-xs bg-red-500 text-white rounded-md hover:bg-red-600">Alert</button>
+        <button id="clearFilters"
+          class="px-2 py-1 text-xs bg-gray-500 text-white rounded-md hover:bg-gray-600">Clear</button>
+        <button id="exportBtn"
+          class="px-2 py-1 text-xs bg-green-500 text-white rounded-md hover:bg-green-600">Export</button>
       </div>
     </div>
 
+    <!-- Table Section -->
     <div class="bg-white shadow-lg rounded-lg overflow-x-auto border">
       <table id="leaveTable" class="w-full text-sm text-left text-gray-800">
         <thead class="bg-blue-50 text-xs uppercase font-bold text-blue-700">
           <tr>
-             <th class="px-1 py-2">Date</th>
+            <th class="px-1 py-2">Date</th>
             <th class="px-1 py-2">Name</th>
-            <th class="px-1 py-2">ID</th>
+            <th class="px-1 py-2">Id</th>
             <th class="px-1 py-2 hidden md:table-cell">Position</th>
             <th class="px-1 py-2 hidden md:table-cell">Status</th>
             <th class="px-1 py-2">Remark</th>
@@ -137,13 +147,10 @@
       });
     }
 
-    function applyFilters() {
-      const idVal = document.getElementById("searchInput").value.trim();
+    function applyFilters(alertOnly = false) {
       const statusVal = document.getElementById("statusFilter").value.toLowerCase();
-      const remarkVal = document.getElementById("remarkSearch").value.toLowerCase();
       const positionVal = document.getElementById("positionFilter").value.toLowerCase();
       const globalVal = document.getElementById("globalSearch").value.toLowerCase();
-
       const fromDateInput = document.getElementById("fromDate").value;
       const fromDateVal = fromDateInput ? new Date(fromDateInput + "T00:00:00") : null;
       const toDateInput = document.getElementById("toDate").value;
@@ -151,14 +158,24 @@
 
       return allData.filter(entry => {
         const autoDate = entry["Date"] ? new Date(entry["Date"]) : null;
-
         let dateMatch = true;
         if (fromDateVal && (!autoDate || autoDate < fromDateVal)) dateMatch = false;
         if (toDateVal && (!autoDate || autoDate > toDateVal)) dateMatch = false;
 
-        return (!idVal || entry.Id.toString().includes(idVal)) &&
-               (!statusVal || entry.Status.toLowerCase().includes(statusVal)) &&
-               (!remarkVal || entry.Remark.toLowerCase().includes(remarkVal)) &&
+        const statusText = entry.Status.trim().toLowerCase();
+        const leaveDate = entry["Leave Date"] ? new Date(entry["Leave Date"]) : null;
+        const diffInMs = leaveDate ? leaveDate - new Date() : null;
+        const isPast = leaveDate && diffInMs < 0;
+        const isWithin15 = leaveDate && diffInMs <= 15 * 86400000 && diffInMs >= 0;
+
+        let alertRow = false;
+        if (["upcoming leave","annual leave","end of contract"].includes(statusText) && (isWithin15 || isPast)) {
+          alertRow = true;
+        }
+
+        if (alertOnly && !alertRow) return false;
+
+        return (!statusVal || statusText.includes(statusVal)) &&
                (!positionVal || entry.position.toLowerCase().includes(positionVal)) &&
                (!globalVal || 
                   entry.Name.toLowerCase().includes(globalVal) ||
@@ -171,8 +188,8 @@
       });
     }
 
-    function renderTable() {
-      const filteredData = applyFilters();
+    function renderTable(alertOnly = false) {
+      const filteredData = applyFilters(alertOnly);
       const tableBody = document.getElementById("leave-table");
       const countDisplay = document.getElementById("recordCount");
       const startIndex = (currentPage - 1) * rowsPerPage;
@@ -210,7 +227,7 @@
           document.head.appendChild(styleSheet);
         }
 
-        if (statusText === "upcoming leave") {
+        if (["upcoming leave","annual leave"].includes(statusText)) {
           if (isWithin15) {
             statusContent = `<span class="bg-red-500 text-white px-2 py-0.5 rounded-full text-xs font-bold inline-block" style="${blinkStyle}">${entry.Status}</span>`;
             remarkClass = "text-red-600 font-semibold";
@@ -277,7 +294,6 @@
           </td>
         `;
 
-        // ✅ Strike-through toggle
         const markBtn = row.querySelector(".markDone");
         markBtn.addEventListener("click", () => {
           row.classList.toggle("line-through");
@@ -289,7 +305,7 @@
     }
 
     // Event Listeners
-    ["searchInput","statusFilter","remarkSearch","positionFilter","fromDate","toDate","globalSearch"].forEach(id => {
+    ["statusFilter","positionFilter","fromDate","toDate","globalSearch"].forEach(id => {
       const el = document.getElementById(id);
       const eventType = (el.tagName === "SELECT" || el.type==="date") ? "change" : "input";
       el.addEventListener(eventType, () => { currentPage = 1; renderTable(); });
@@ -307,12 +323,11 @@
     });
 
     document.getElementById("clearFilters").addEventListener("click", () => {
-      ["searchInput","statusFilter","remarkSearch","positionFilter","fromDate","toDate","globalSearch"].forEach(id => document.getElementById(id).value = "");
+      ["statusFilter","positionFilter","fromDate","toDate","globalSearch"].forEach(id => document.getElementById(id).value = "");
       currentPage = 1;
       renderTable();
     });
 
-    // Export to Excel
     document.getElementById("exportBtn").addEventListener("click", () => {
       const filteredData = applyFilters();
       const ws = XLSX.utils.json_to_sheet(filteredData);
@@ -321,10 +336,14 @@
       XLSX.writeFile(wb, "LeaveData.xlsx");
     });
 
-    // Mobile menu
     document.getElementById("menuBtn").addEventListener("click", () => {
       const menu = document.getElementById("mobileDropdown");
       menu.classList.toggle("hidden");
+    });
+
+    document.getElementById("alertBtn").addEventListener("click", () => {
+      currentPage = 1;
+      renderTable(true); // show only alert rows
     });
 
     fetchLeaveData();
