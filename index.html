@@ -6,20 +6,22 @@
   <title>Leave & Transfer Status Dashboard HC-03</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <style>
-    .blink-badge {
-      animation: blinker 1s linear infinite;
-      background-color: #f87171;
-      color: white;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: bold;
-    }
-    @keyframes blinker {
-      50% { opacity: 0; }
-    }
-  </style>
+ <style>
+  .blink-badge {
+    animation: soft-blinker 2.5s ease-in-out infinite; /* slower and smoother */
+    background-color: #f5b5b5; /* softer light red */
+    color: #802222;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: bold;
+  }
+
+  @keyframes soft-blinker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; } /* partially visible instead of disappearing */
+  }
+</style>
 </head>
 
 <body class="bg-gradient-to-br from-gray-100 to-white min-h-screen font-sans">
@@ -217,8 +219,12 @@
         const isWithin15 = leaveDate && diffInMs <= 15 * 86400000 && diffInMs >= 0;
         const isWithin5 = leaveDate && diffInMs <= 5 * 86400000 && diffInMs >= 0;
 
-        const blinkStyle = "animation: blink 1s step-start infinite;";
-        const blinkKeyframes = `@keyframes blink { 50% { opacity: 0; } }`;
+        const blinkStyle = "animation: soft-blinker 2.5s ease-in-out infinite;";
+      const blinkKeyframes = `@keyframes soft-blinker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}`;
+
         if (!document.getElementById("blink-keyframes")) {
           const styleSheet = document.createElement("style");
           styleSheet.type = "text/css";
@@ -229,8 +235,8 @@
 
         if (["upcoming leave","annual leave"].includes(statusText)) {
           if (isWithin15) {
-            statusContent = `<span class="bg-red-500 text-white px-2 py-0.5 rounded-full text-xs font-bold inline-block" style="${blinkStyle}">${entry.Status}</span>`;
-            remarkClass = "text-red-600 font-semibold";
+            statusContent = `<span class="bg-orange-300 text-orange-900 px-2 py-0.5 rounded-full text-xs font-bold inline-block" style="${blinkStyle}">${entry.Status}</span>`;
+        remarkClass = "text-black-600 font-bold"
           } else if (isPast) {
             statusContent = `<span class="bg-black text-white px-2 py-0.5 rounded-full text-xs font-bold inline-block" style="${blinkStyle}">${entry.Status}</span>`;
           } else {
