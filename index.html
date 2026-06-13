@@ -19,26 +19,36 @@
 
   <h1 class="text-4xl font-bold text-blue-700 mb-12 text-center">Select Project</h1>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-12 w-full max-w-4xl px-4">
+ <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 w-full max-w-6xl px-4">
 
-    <!-- Red Sea Button -->
-    <div onclick="openProject('redSea.html')" 
-      class="project-card cursor-pointer bg-red-600 hover:bg-red-700 transition shadow-xl rounded-3xl flex flex-col items-center justify-center py-24 px-12 text-center">
-      <span class="text-6xl mb-4">🏝️</span>
-      <h2 class="text-white font-bold text-3xl">Red Sea</h2>
-      <p class="text-white/80 mt-2 text-sm">Click to open Red Sea Dashboard</p>
-    </div>
+  <!-- Red Sea Button -->
+ <div 
+  class="project-card bg-red-600 opacity-60 blur-[1px] cursor-not-allowed shadow-xl rounded-3xl flex flex-col items-center justify-center py-24 px-12 text-center pointer-events-none">
+  
+  <span class="text-6xl mb-4">🏝️</span>
+  
+  <h2 class="text-white font-bold text-3xl">Red Sea</h2>
+  
+  <p class="text-white/80 mt-2 text-sm">Records Saved Personally</p>
+</div>
 
-    <!-- Amala Button -->
-    <div onclick="openProject('amala.html')" 
-      class="project-card cursor-pointer bg-green-600 hover:bg-green-700 transition shadow-xl rounded-3xl flex flex-col items-center justify-center py-24 px-12 text-center">
-      <span class="text-6xl mb-4">🌿</span>
-      <h2 class="text-white font-bold text-3xl">Amala</h2>
-      <p class="text-white/80 mt-2 text-sm">Click to open Amala Dashboard</p>
-    </div>
-
+  <!-- Amala Button -->
+  <div onclick="openProject('amala.html')" 
+    class="project-card cursor-pointer bg-green-600 hover:bg-green-700 transition shadow-xl rounded-3xl flex flex-col items-center justify-center py-24 px-12 text-center">
+    <span class="text-6xl mb-4">🌿</span>
+    <h2 class="text-white font-bold text-3xl">Amala</h2>
+    <p class="text-white/80 mt-2 text-sm">Click to open Amala Dashboard</p>
   </div>
 
+  <!-- Roshan Button -->
+  <div onclick="openProject('roshan.html')" 
+    class="project-card cursor-pointer bg-blue-600 hover:bg-blue-700 transition shadow-xl rounded-3xl flex flex-col items-center justify-center py-24 px-12 text-center">
+    <span class="text-6xl mb-4">🏢</span>
+    <h2 class="text-white font-bold text-3xl">Roshan</h2>
+    <p class="text-white/80 mt-2 text-sm">Click to open Roshan Dashboard</p>
+  </div>
+
+</div>
   <script>
     function openProject(file) {
       // Open in new tab
